@@ -1,0 +1,36 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project Exhibit",
+      "description": "Detailed portfolio metadata for a creative campaign or media exhibit",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier of the exhibit" },
+        "title": { "type": "string", "description": "Name/title of the project" },
+        "alias": { "type": "string", "description": "URL route slug/alias" },
+        "client": { "type": "string", "description": "Client company name" },
+        "category": { "type": "string", "enum": ["Photography", "Commercial", "Branding", "Social Media", "Food Content", "Fashion"] },
+        "tagline": { "type": "string", "description": "Brief striking phrase summarizing the work" },
+        "description": { "type": "string", "description": "In-depth narrative of the work" },
+        "heroImage": { "type": "string", "description": "Primary high-resolution visual cover" },
+        "videoUrl": { "type": "string", "description": "Looping preview ambient clip URL" },
+        "fullVideoUrl": { "type": "string", "description": "Anamorphic main cinema video URL" },
+        "year": { "type": "string", "description": "Release calendar year" },
+        "campaignDetails": { "type": "string", "description": "Tactile or experiential execution narratives" },
+        "stats": { "type": "array", "description": "Metrics / visual numerical cards" },
+        "credits": { "type": "array", "description": "Artistic roster credits" },
+        "gallery": { "type": "array", "description": "Contextual macro photography details" },
+        "socialLinks": { "type": "object", "description": "External handles and vimeo connections" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "alias", "client", "category", "tagline", "description", "heroImage", "year", "stats", "credits", "gallery", "campaignDetails"]
+    }
+  },
+  "firestore": {
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Dynamic media exhibits collection"
+    }
+  }
+}

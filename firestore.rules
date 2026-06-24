@@ -1,0 +1,146 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default safety net - Deny all by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Shared global primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Bootstrapped admin verification - strictly authorizes the verified developer email
+    function isAdmin() {
+      return isSignedIn() && 
+             (request.auth.token.email == "Besofekad@gmail.com" ||
+              request.auth.token.email == "besofekad@gmail.com") && 
+             request.auth.token.email_verified == true;
+    }
+
+    // ID Poisoning guard - restricts characters and length
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Complete validation blueprint - protects against shadow values or out-of-bound strings/lists
+    function isValidProject(data) {
+      return data.keys().hasAll(['id', 'title', 'alias', 'client', 'category', 'tagline', 'description', 'heroImage', 'year', 'campaignDetails', 'stats', 'credits', 'gallery', 'publishState', 'featured', 'archived']) &&
+             data.keys().size() <= 19 &&
+             data.id is string && data.id.size() <= 100 &&
+             data.title is string && data.title.size() <= 100 &&
+             data.alias is string && data.alias.size() <= 100 &&
+             data.client is string && data.client.size() <= 100 &&
+             data.category is string && (
+               data.category == "Photography" || 
+               data.category == "Commercial" || 
+               data.category == "Branding" || 
+               data.category == "Social Media" || 
+               data.category == "Food Content" || 
+               data.category == "Fashion"
+             ) &&
+             data.tagline is string && data.tagline.size() <= 500 &&
+             data.description is string && data.description.size() <= 5000 &&
+             data.heroImage is string && data.heroImage.size() <= 1000 &&
+             (!("videoUrl" in data) || (data.videoUrl is string && data.videoUrl.size() <= 1000)) &&
+             (!("fullVideoUrl" in data) || (data.fullVideoUrl is string && data.fullVideoUrl.size() <= 1000)) &&
+             data.year is string && data.year.size() <= 10 &&
+             (data.publishState == "draft" || data.publishState == "published") &&
+             data.featured is bool &&
+             data.archived is bool &&
+             data.campaignDetails is string && data.campaignDetails.size() <= 10000 &&
+             data.stats is list && data.stats.size() <= 10 &&
+             data.credits is list && data.credits.size() <= 20 &&
+             data.gallery is list && data.gallery.size() <= 30;
+    }
+
+    function isValidInquiry(data) {
+      return data.keys().hasAll([
+               'name',
+               'email',
+               'company',
+               'practice',
+               'budget',
+               'budgetCurrency',
+               'timeline',
+               'goal',
+               'platforms',
+               'deliverables',
+               'nextStep',
+               'callType',
+               'meetingDay',
+               'pricingMode',
+               'estimateProjectType',
+               'estimateSummary',
+               'recommendedPackage',
+               'referralSource',
+               'story',
+               'status',
+               'createdAt',
+               'updatedAt'
+             ]) &&
+             data.keys().size() == 22 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
+             data.email is string && data.email.size() > 3 && data.email.size() <= 160 &&
+             data.company is string && data.company.size() <= 160 &&
+             data.practice is string && data.practice.size() <= 120 &&
+             data.budget is string && data.budget.size() <= 80 &&
+             data.budgetCurrency is string && data.budgetCurrency.size() <= 8 &&
+             data.timeline is string && data.timeline.size() <= 120 &&
+             data.goal is string && data.goal.size() <= 160 &&
+             data.platforms is list && data.platforms.size() <= 10 &&
+             data.deliverables is list && data.deliverables.size() <= 10 &&
+             data.nextStep is string && data.nextStep.size() <= 80 &&
+             data.callType is string && data.callType.size() <= 80 &&
+             data.meetingDay is string && data.meetingDay.size() <= 80 &&
+             data.pricingMode is string && data.pricingMode.size() <= 40 &&
+             data.estimateProjectType is string && data.estimateProjectType.size() <= 80 &&
+             data.estimateSummary is string && data.estimateSummary.size() <= 240 &&
+             data.recommendedPackage is string && data.recommendedPackage.size() <= 160 &&
+             data.referralSource is string && data.referralSource.size() <= 120 &&
+             data.story is string && data.story.size() <= 5000 &&
+             data.status == 'new';
+    }
+
+    match /projects/{projectId} {
+      // Secure list query and retrieval is open to allow portfolio showcase to visitors
+      allow get, list: if true;
+      
+      // Creating exhibits requires authenticated and verified admin matching identity
+      allow create: if isAdmin() && 
+                    isValidId(projectId) && 
+                    projectId == incoming().id &&
+                    incoming().createdAt == request.time &&
+                    isValidProject(incoming());
+                    
+      // Updates require same identity, preserving immutable keys
+      allow update: if isAdmin() && 
+                    isValidId(projectId) &&
+                    incoming().id == existing().id &&
+                    incoming().alias == existing().alias &&
+                    incoming().createdAt == existing().createdAt &&
+                    incoming().updatedAt == request.time &&
+                    isValidProject(incoming());
+                    
+      // Deletion is locked down strictly to the verified admin
+      allow delete: if isAdmin() && isValidId(projectId);
+    }
+
+    match /inquiries/{inquiryId} {
+      allow create: if isValidInquiry(incoming()) &&
+                    incoming().createdAt == request.time &&
+                    incoming().updatedAt == request.time;
+      allow get, list, update, delete: if isAdmin();
+    }
+  }
+}

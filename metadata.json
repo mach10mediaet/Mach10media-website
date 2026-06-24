@@ -1,0 +1,6 @@
+{
+  "name": "Mach10 Media Portfolio",
+  "description": "A cinematic, luxury digital portfolio experience for Mach10 Media, a premium branding, marketing, and media production agency.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

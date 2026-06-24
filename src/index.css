@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&family=Outfit:wght@200;300;400;500;700;900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Inter:wght@200;300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Poppins", "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Outfit", "Poppins", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-studio-dark: #080808;
+  --color-studio-light: #f2f2f2;
+}
+
+/* Rest of your CSS remains the same */
+
+/* Custom visual helpers requested in Clean Minimalism */
+.webkit-stroke {
+  -webkit-text-stroke: 1.2px rgba(255, 255, 255, 0.35);
+  color: transparent;
+}
+
+.text-stroke-thin {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+  color: transparent;
+}
+
+.cinematic-glow {
+  box-shadow: 0 0 50px 10px rgba(255, 255, 255, 0.035);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+/* Prevent typography overlaps on short viewports (tablet landscape, small laptops & mobile) */
+#hero-section {
+  padding-top: 150px !important; /* Always secure space for the fixed header */
+}
+
+@media (max-width: 1023px) {
+  #hero-section {
+    padding-top: 160px !important;
+    padding-bottom: 60px !important;
+    min-height: 100svh !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
+  }
+}
+
+@media (max-height: 850px) {
+  #hero-section {
+    padding-top: 140px !important;
+    padding-bottom: 50px !important;
+    min-height: auto !important;
+    height: auto !important;
+  }
+
+  #hero-section h1 {
+    font-size: clamp(1.8rem, 5.5vw, 4.5rem) !important; /* Dynamically scaled fluid typography */
+    line-height: 1.1 !important;
+  }
+  
+  #hero-section p {
+    margin-top: 1rem !important;
+  }
+}
+
+@media (max-height: 680px) {
+  #hero-section {
+    padding-top: 120px !important;
+    padding-bottom: 40px !important;
+    min-height: auto !important;
+    height: auto !important;
+  }
+
+  #hero-section h1 {
+    font-size: clamp(1.5rem, 5vw, 3.2rem) !important;
+    line-height: 1.05 !important;
+  }
+  
+  #hero-section p {
+    margin-top: 0.75rem !important;
+  }
+}
