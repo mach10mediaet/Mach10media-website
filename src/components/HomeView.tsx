@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ArrowDown, ArrowUpRight, Play, Quote, ChevronLeft, ChevronRight, Activity, Volume2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Project, ActiveView } from '../types';
-import heroVideo from '../assets/hero.mp4';
+import heroVideo from '../assets/Hero.mp4';
 
 interface HomeViewProps {
   projects: Project[];
