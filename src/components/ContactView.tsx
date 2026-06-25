@@ -3,12 +3,10 @@ import { Send, MapPin, Sparkles, Mail, Phone, CheckCircle2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
-import { SERVICE_PACKAGES } from '../data/servicePackages';
 
 type BudgetTier = 'under-50k' | '50k-100k' | '100k-250k' | 'over-250k';
 type Currency = 'USD' | 'ETB';
-type PricingMode = 'known' | 'estimate';
-type EstimateProjectType = 'one-time-video' | 'photoshoot' | 'retainer';
+type PricingMode = 'range' | 'exact';
 type GoalOption = 'Launch a campaign' | 'Build a content library' | 'Grow on social media' | 'Refresh my brand image';
 type PlatformOption = 'Instagram' | 'TikTok' | 'Website' | 'Paid Ads' | 'Print / OOH';
 type DeliverableOption = 'Brand Film' | 'Reels / Short Videos' | 'Campaign Photos' | 'Product Photos' | 'Launch Assets';
@@ -26,23 +24,17 @@ const budgetThresholds: BudgetTier[] = [
 
 const budgetLabels: Record<Currency, Record<BudgetTier, string>> = {
   USD: {
-    'under-50k': '< $50,000',
-    '50k-100k': '$50k - $100k',
-    '100k-250k': '$100k - $250k',
-    'over-250k': '> $250,000'
+    'under-50k': '< $500',
+    '50k-100k': '$500 - $1000',
+    '100k-250k': '$1000 - $1500',
+    'over-250k': '> $2000'
   },
   ETB: {
-    'under-50k': '< ETB 5M',
-    '50k-100k': 'ETB 5M - 10M',
-    '100k-250k': 'ETB 10M - 25M',
-    'over-250k': '> ETB 25M'
+    'under-50k': '< ETB 50K',
+    '50k-100k': 'ETB 50K - 70K',
+    '100k-250k': 'ETB 70K - 100K',
+    'over-250k': '> ETB 150K'
   }
-};
-
-const projectTypeLabels: Record<EstimateProjectType, string> = {
-  'one-time-video': 'One-Time Video Production',
-  photoshoot: 'One-Time Photoshoot',
-  retainer: 'Retainer Package'
 };
 
 const goals: GoalOption[] = ['Launch a campaign', 'Build a content library', 'Grow on social media', 'Refresh my brand image'];
@@ -53,40 +45,6 @@ const callTypes: CallTypeOption[] = ['Zoom Call', 'Phone Call', 'In-Person Meeti
 const meetingDays: MeetingDayOption[] = ['Weekday Morning', 'Weekday Afternoon', 'Weekday Evening', 'Flexible'];
 const referralSources: ReferralSourceOption[] = ['Instagram', 'Google Search', 'Referral', 'TikTok', 'Website', 'Other'];
 const INQUIRY_NOTIFICATION_EMAIL = import.meta.env.VITE_INQUIRY_NOTIFICATION_EMAIL || 'mach10media.et@gmail.com';
-
-const getBudgetBracket = (value: number): BudgetTier => {
-  if (value < 50000) return 'under-50k';
-  if (value < 100000) return '50k-100k';
-  if (value < 250000) return '100k-250k';
-  return 'over-250k';
-};
-
-const formatEstimateSummary = (projectType: EstimateProjectType, videoCount: number, photoCount: number) => {
-  if (projectType === 'one-time-video') {
-    return `${videoCount} video deliverable${videoCount === 1 ? '' : 's'}`;
-  }
-
-  if (projectType === 'photoshoot') {
-    return `${photoCount} edited photo${photoCount === 1 ? '' : 's'}`;
-  }
-
-  return `${videoCount} video deliverable${videoCount === 1 ? '' : 's'} + ${photoCount} edited photo${photoCount === 1 ? '' : 's'} per month`;
-};
-
-const getEstimatedBudget = (projectType: EstimateProjectType, videoCount: number, photoCount: number): BudgetTier => {
-  if (projectType === 'one-time-video') {
-    const estimatedValue = 18000 + videoCount * 22000;
-    return getBudgetBracket(estimatedValue);
-  }
-
-  if (projectType === 'photoshoot') {
-    const estimatedValue = 12000 + photoCount * 900;
-    return getBudgetBracket(estimatedValue);
-  }
-
-  const estimatedValue = 28000 + videoCount * 18000 + photoCount * 700;
-  return getBudgetBracket(estimatedValue);
-};
 
 const toggleSelection = <T,>(items: T[], item: T) =>
   items.includes(item) ? items.filter((value) => value !== item) : [...items, item];
@@ -177,17 +135,15 @@ export default function ContactView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [pricingMode, setPricingMode] = useState<PricingMode>('known');
+  const [pricingMode, setPricingMode] = useState<PricingMode>('range');
   const [currency, setCurrency] = useState<Currency>('USD');
-  const [estimateProjectType, setEstimateProjectType] = useState<EstimateProjectType>('one-time-video');
-  const [estimatedVideoCount, setEstimatedVideoCount] = useState(2);
-  const [estimatedPhotoCount, setEstimatedPhotoCount] = useState(24);
+  const [exactBudget, setExactBudget] = useState('');
 
   const practices = [
     'Branding & Design',
     'Commercial Film',
     'Fashion Photography',
-    'Social Strategy',
+    'Social  Strategy',
     'Full Campaign Orchestration'
   ];
 
@@ -199,32 +155,23 @@ export default function ContactView() {
     {
       city: 'Addis Ababa',
       desc: 'Headquarters',
-      address: 'Addis Ababa, Ehtiopia, Kazanchis Kidus Complex ',
+      address: 'Kidus Complex, Kazanchis, Addis Ababa, Ehtiopia,  ',
       email: 'Mach10media.et@gmail.com',
-      phone: '+251-920969486'
+      phone: '+251-920969486, +251-920523976'
     }
   ];
 
-  const estimatedBudget = getEstimatedBudget(estimateProjectType, estimatedVideoCount, estimatedPhotoCount);
-  const estimateSummary = formatEstimateSummary(estimateProjectType, estimatedVideoCount, estimatedPhotoCount);
-  const resolvedBudgetTier = pricingMode === 'estimate' ? estimatedBudget : formData.budget;
-  const resolvedBudgetLabel = budgetLabels[currency][resolvedBudgetTier];
-
-  const recommendedPackage =
-    estimateProjectType === 'one-time-video'
-      ? SERVICE_PACKAGES.find((item) => item.key === 'video-production')
-      : estimateProjectType === 'photoshoot'
-        ? SERVICE_PACKAGES.find((item) => item.key === 'photoshoot')
-        : SERVICE_PACKAGES.find((item) => item.key === 'content-retainer');
+  const resolvedBudgetLabel =
+    pricingMode === 'exact'
+      ? `${currency} ${exactBudget || '0'}`
+      : budgetLabels[currency][formData.budget];
 
   const resetForm = () => {
     setSubmitted(false);
     setSubmitError(null);
-    setPricingMode('known');
+    setPricingMode('range');
     setCurrency('USD');
-    setEstimateProjectType('one-time-video');
-    setEstimatedVideoCount(2);
-    setEstimatedPhotoCount(24);
+    setExactBudget('');
     setFormData({
       name: '',
       email: '',
@@ -267,9 +214,9 @@ export default function ContactView() {
       callType: shouldShowBookingFields ? formData.callType : '',
       meetingDay: shouldShowBookingFields ? formData.meetingDay : '',
       pricingMode: shouldShowBriefFields ? pricingMode : '',
-      estimateProjectType: shouldShowBriefFields && pricingMode === 'estimate' ? estimateProjectType : '',
-      estimateSummary: shouldShowBriefFields && pricingMode === 'estimate' ? estimateSummary : '',
-      recommendedPackage: shouldShowBriefFields && pricingMode === 'estimate' ? recommendedPackage?.title || 'Custom Scope' : '',
+      estimateProjectType: '',
+      estimateSummary: pricingMode === 'exact' && exactBudget ? `Exact budget provided: ${currency} ${exactBudget}` : '',
+      recommendedPackage: '',
       referralSource: formData.referralSource,
       story: formData.story || '',
       status: 'new',
@@ -542,109 +489,42 @@ export default function ContactView() {
                               <div className="inline-flex rounded-full border border-white/10 bg-white/[0.05] p-1 shadow-[0_12px_30px_rgba(0,0,0,0.18)] backdrop-blur-md">
                                 <button
                                   type="button"
-                                  onClick={() => setPricingMode('known')}
-                                  className={getSegmentButtonClass(pricingMode === 'known', 'accent')}
+                                  onClick={() => setPricingMode('range')}
+                                  className={getSegmentButtonClass(pricingMode === 'range', 'accent')}
                                 >
-                                  I KNOW MY BUDGET
+                                  BUDGET RANGE
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => {
-                                    setPricingMode('estimate');
-                                    setFormData({ ...formData, budget: estimatedBudget });
-                                  }}
-                                  className={getSegmentButtonClass(pricingMode === 'estimate', 'accent')}
+                                  onClick={() => setPricingMode('exact')}
+                                  className={getSegmentButtonClass(pricingMode === 'exact', 'accent')}
                                 >
-                                  HELP ME ESTIMATE
+                                  I KNOW MY BUDGET
                                 </button>
                               </div>
                             </div>
                           </div>
 
-                          {pricingMode === 'estimate' ? (
-                            <div className="border border-white/5 bg-[#0c0c0c]/50 p-5 sm:p-6 space-y-5">
-                              <div className="flex flex-wrap gap-2">
-                                {(Object.keys(projectTypeLabels) as EstimateProjectType[]).map((type) => (
-                                  <button
-                                    key={type}
-                                    type="button"
-                                    onClick={() => {
-                                      setEstimateProjectType(type);
-                                      setFormData({ ...formData, budget: getEstimatedBudget(type, estimatedVideoCount, estimatedPhotoCount) });
-                                    }}
-                                    className={`${getSelectableButtonClass(estimateProjectType === type)} text-[11px]`}
-                                  >
-                                    {projectTypeLabels[type]}
-                                  </button>
-                                ))}
+                          {pricingMode === 'exact' ? (
+                            <div className="border border-white/5 bg-[#0c0c0c]/50 p-5 sm:p-6">
+                              <label className="mb-3 block font-mono text-[11px] tracking-widest text-[#737373] uppercase">
+                                EXACT BUDGET
+                              </label>
+                              <div className="flex items-center gap-3 border-b border-white/10 py-2.5 transition-all focus-within:border-white">
+                                <span className="font-mono text-sm tracking-[0.2em] text-[#F9A136] uppercase">{currency}</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  inputMode="numeric"
+                                  placeholder={currency === 'ETB' ? 'e.g. 75000' : 'e.g. 1200'}
+                                  value={exactBudget}
+                                  onChange={(e) => setExactBudget(e.target.value)}
+                                  className="w-full border-0 bg-transparent p-0 text-base font-light text-white placeholder:text-[#333] focus:outline-none"
+                                />
                               </div>
-
-                              <div className="grid gap-5 sm:grid-cols-2">
-                                {(estimateProjectType === 'one-time-video' || estimateProjectType === 'retainer') && (
-                                  <div>
-                                    <label className="mb-3 block font-mono text-[11px] tracking-widest text-[#737373] uppercase">
-                                      {estimateProjectType === 'retainer' ? 'VIDEOS PER MONTH' : 'HOW MANY VIDEOS'}
-                                    </label>
-                                    <input
-                                      type="range"
-                                      min={1}
-                                      max={estimateProjectType === 'retainer' ? 8 : 6}
-                                      value={estimatedVideoCount}
-                                      onChange={(e) => {
-                                        const nextCount = Number(e.target.value);
-                                        setEstimatedVideoCount(nextCount);
-                                        setFormData({ ...formData, budget: getEstimatedBudget(estimateProjectType, nextCount, estimatedPhotoCount) });
-                                      }}
-                                      className="w-full accent-[#F9A136]"
-                                    />
-                                    <p className="mt-2 font-mono text-xs tracking-[0.16em] text-white uppercase">{estimatedVideoCount}</p>
-                                  </div>
-                                )}
-
-                                {(estimateProjectType === 'photoshoot' || estimateProjectType === 'retainer') && (
-                                  <div>
-                                    <label className="mb-3 block font-mono text-[11px] tracking-widest text-[#737373] uppercase">
-                                      {estimateProjectType === 'retainer' ? 'PHOTOS PER MONTH' : 'HOW MANY PHOTOS'}
-                                    </label>
-                                    <input
-                                      type="range"
-                                      min={estimateProjectType === 'retainer' ? 10 : 12}
-                                      max={120}
-                                      step={estimateProjectType === 'retainer' ? 5 : 4}
-                                      value={estimatedPhotoCount}
-                                      onChange={(e) => {
-                                        const nextCount = Number(e.target.value);
-                                        setEstimatedPhotoCount(nextCount);
-                                        setFormData({ ...formData, budget: getEstimatedBudget(estimateProjectType, estimatedVideoCount, nextCount) });
-                                      }}
-                                      className="w-full accent-[#F9A136]"
-                                    />
-                                    <p className="mt-2 font-mono text-xs tracking-[0.16em] text-white uppercase">{estimatedPhotoCount}</p>
-                                  </div>
-                                )}
-                              </div>
-
-                              <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-                                <div className="border border-[#F9A136]/18 bg-[#F9A136]/10 p-4">
-                                  <p className="font-mono text-[10px] tracking-[0.16em] text-[#F9A136] uppercase">SUGGESTED BUDGET RANGE</p>
-                                  <div className="mt-3 flex flex-wrap items-center gap-3">
-                                    <span className="rounded-full bg-[#F9A136] px-4 py-2 font-mono text-[10px] tracking-[0.16em] text-black uppercase">
-                                      {budgetLabels[currency][estimatedBudget]}
-                                    </span>
-                                    <span className="font-sans text-sm font-light text-neutral-200">{estimateSummary}</span>
-                                  </div>
-                                </div>
-
-                                <div className="border border-white/8 bg-black/20 p-4">
-                                  <p className="font-mono text-[10px] tracking-[0.16em] text-neutral-300 uppercase">RECOMMENDED PACKAGE</p>
-                                  <h4 className="mt-3 font-sans text-lg font-light tracking-tight text-white uppercase">
-                                    {recommendedPackage?.title || 'Custom Scope'}
-                                  </h4>
-                                  <p className="mt-2 font-mono text-[10px] tracking-[0.16em] text-[#F9A136] uppercase">
-                                    {recommendedPackage?.price || 'Custom Quote'}
-                                  </p>
-                                </div>
-                              </div>
+                              <p className="mt-3 font-sans text-sm font-light text-neutral-400">
+                                Enter the amount you already have approved or want us to work within.
+                              </p>
                             </div>
                           ) : (
                             <div className="flex flex-wrap gap-2">

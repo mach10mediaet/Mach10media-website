@@ -169,6 +169,8 @@ export default function App() {
             stats: data.stats || [],
             credits: data.credits || [],
             gallery: data.gallery || [],
+            createdAt: data.createdAt,
+            updatedAt: data.updatedAt,
             socialLinks: data.socialLinks,
           });
         });

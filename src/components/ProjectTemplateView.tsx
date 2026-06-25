@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { ArrowLeft, ArrowUpRight, Play, Pause, Volume2, VolumeX, Sparkles, Instagram, Globe, ZoomIn, X, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Project } from '../types';
+import { getVideoEmbedUrl, isDirectVideoUrl } from '../utils/video';
 
 interface ProjectTemplateViewProps {
   project: Project;
@@ -16,7 +17,6 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
   const [activeMediaIndex, setActiveMediaIndex] = useState<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Playback control mockup
   const handlePlayToggle = () => {
     if (videoRef.current) {
       if (isPlaying) {
@@ -35,8 +35,7 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
     }
   };
 
-  // Find next project to tease at the page bottom
-  const currentIndex = allProjects.findIndex(p => p.id === project.id);
+  const currentIndex = allProjects.findIndex((p) => p.id === project.id);
   const nextProject = allProjects[(currentIndex + 1) % allProjects.length];
 
   const handleNextProjectClick = () => {
@@ -44,10 +43,12 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const primaryVideoUrl = project.fullVideoUrl || project.videoUrl;
+  const embeddedVideoUrl = getVideoEmbedUrl(primaryVideoUrl);
+  const directVideoUrl = isDirectVideoUrl(primaryVideoUrl) ? primaryVideoUrl : null;
+
   return (
     <div className="bg-transparent min-h-screen text-[#f2f2f2] pt-28 pb-12">
-      
-      {/* Back to archives utility bar */}
       <div className="border-b border-white/5 py-4 px-6 md:px-12 bg-[#080808]/90 backdrop-blur-md sticky top-[72px] z-20">
         <div className="mx-auto max-w-7xl flex items-center justify-between">
           <button
@@ -58,14 +59,13 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
             <ArrowLeft className="h-4.5 w-4.5 transition-transform group-hover:-translate-x-1" />
             <span>Back to Exhibits</span>
           </button>
-          
+
           <div className="font-mono text-[9px] tracking-[0.2em] text-[#525252] uppercase hidden sm:block">
             ARCHIVE ENTRY ID: {project.id} &bull; CLIENT: {project.client.split(' ')[0]}
           </div>
         </div>
       </div>
 
-      {/* SECTION 1 - HERO PARALLAX BANNER */}
       <section className="relative h-[70vh] w-full overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-black">
           <img
@@ -83,7 +83,7 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
               <Sparkles className="h-3 w-3 animate-pulse text-[#a3a3a3]" />
               <span className="font-mono text-[9px] tracking-[0.3em] uppercase">{project.category} &bull; {project.year}</span>
             </div>
-            
+
             <h1 className="font-sans text-4xl font-extralight tracking-tighter text-[#f2f2f2] sm:text-5xl md:text-6xl max-w-4xl uppercase">
               {project.title}
             </h1>
@@ -95,33 +95,22 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
       </section>
 
       <div className="mx-auto max-w-7xl px-6 py-20 md:px-12">
-        
-        {/* SECTION 2 - OUTCOMES / STATS GLASS PANEL */}
         {project.stats && project.stats.length > 0 && (
           <section className="mb-24 border border-white/5 bg-[#0c0c0c]/40 p-10 backdrop-blur-md grid gap-8 sm:grid-cols-3">
             {project.stats.map((stat, i) => (
               <div key={i} className="text-center sm:text-left border-b sm:border-b-0 sm:border-r border-white/10 last:border-0 pb-6 sm:pb-0 sm:pr-8 last:pr-0">
-                <p className="font-mono text-[9px] tracking-[0.3em] text-[#737373] uppercase mb-2">
-                  {stat.label}
-                </p>
-                <p className="font-sans text-3xl font-extralight tracking-tighter text-white md:text-4xl uppercase">
-                  {stat.value}
-                </p>
+                <p className="font-mono text-[9px] tracking-[0.3em] text-[#737373] uppercase mb-2">{stat.label}</p>
+                <p className="font-sans text-3xl font-extralight tracking-tighter text-white md:text-4xl uppercase">{stat.value}</p>
               </div>
             ))}
           </section>
         )}
 
-        {/* SECTION 3 - CAMPAIGN DISCOURSE & BRAND LOGO */}
         <section className="grid gap-12 md:grid-cols-12 md:gap-20 mb-28">
           <div className="md:col-span-4 flex flex-col justify-start">
             <div className="border border-white/10 px-6 py-8 inline-block select-none text-center bg-[#0c0c0c]/60 mb-8 max-w-[240px]">
-              <span className="font-sans text-xl font-black tracking-[0.3em] text-white">
-                {project.client.toUpperCase()}
-              </span>
-              <p className="font-mono text-[8px] tracking-widest text-[#525252] uppercase mt-2">
-                REPRESENTATION EMBLEM
-              </p>
+              <span className="font-sans text-xl font-black tracking-[0.3em] text-white">{project.client.toUpperCase()}</span>
+              <p className="font-mono text-[8px] tracking-widest text-[#525252] uppercase mt-2">REPRESENTATION EMBLEM</p>
             </div>
 
             <div className="font-mono text-xs text-neutral-400 space-y-4">
@@ -155,63 +144,70 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
 
           <div className="md:col-span-8">
             <p className="font-mono text-[10px] tracking-[0.3em] text-[#737373] uppercase mb-4">THE CONCEPT STORY</p>
-            <h2 className="font-sans text-xl font-light text-neutral-300 leading-relaxed max-w-2xl">
-              {project.description}
-            </h2>
-            
+            <h2 className="font-sans text-xl font-light text-neutral-300 leading-relaxed max-w-2xl">{project.description}</h2>
+
             <p className="mt-8 font-sans text-sm font-light leading-relaxed text-[#8c8c8c] max-w-3xl border-l border-white/15 pl-6 py-2.5">
               {project.campaignDetails}
             </p>
           </div>
         </section>
 
-        {/* SECTION 4 - EMBEDDED VIDEO PRESENTATION RUNNER */}
-        {project.fullVideoUrl && (
+        {(embeddedVideoUrl || directVideoUrl) && (
           <section className="mb-28">
             <p className="font-mono text-[10px] tracking-[0.3em] text-[#737373] uppercase mb-6">VIDEO RUNNER PRESENTATION</p>
-            
+
             <div className="relative aspect-video w-full overflow-hidden bg-neutral-950 border border-white/10 p-2 group">
               <div className="w-full h-full overflow-hidden relative">
-                <video
-                  ref={videoRef}
-                  src={project.fullVideoUrl}
-                  loop
-                  playsInline
-                  className="h-full w-full object-cover"
-                />
-              
-              {/* Custom floating control panel */}
-              <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/90 to-transparent p-6 opacity-100 transition-opacity flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={handlePlayToggle}
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-black hover:bg-[#F9A136] transition-all"
-                    id="video-player-play-button"
-                  >
-                    {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current ml-0.5" />}
-                  </button>
-                  <button
-                    onClick={handleMuteToggle}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/40 text-neutral-300 hover:text-[#F9A136] hover:border-[#F9A136]/30 transition-all font-mono"
-                  >
-                    {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                  </button>
-                </div>
+                {directVideoUrl ? (
+                  <>
+                    <video
+                      ref={videoRef}
+                      src={directVideoUrl}
+                      loop
+                      playsInline
+                      className="h-full w-full object-cover"
+                    />
 
-                 <div className="font-mono text-[9.5px] text-neutral-400 uppercase tracking-widest hidden sm:block">
-                  PLAYBACK: {isPlaying ? 'STREAMING ACTIVE' : 'PAUSED'} &bull; CINEMA 4K WIDESCREEN
-                </div>
+                    <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/90 to-transparent p-6 opacity-100 transition-opacity flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <button
+                          onClick={handlePlayToggle}
+                          className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-black hover:bg-[#F9A136] transition-all"
+                          id="video-player-play-button"
+                        >
+                          {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current ml-0.5" />}
+                        </button>
+                        <button
+                          onClick={handleMuteToggle}
+                          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/40 text-neutral-300 hover:text-[#F9A136] hover:border-[#F9A136]/30 transition-all font-mono"
+                        >
+                          {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                        </button>
+                      </div>
+
+                      <div className="font-mono text-[9.5px] text-neutral-400 uppercase tracking-widest hidden sm:block">
+                        PLAYBACK: {isPlaying ? 'STREAMING ACTIVE' : 'PAUSED'} &bull; CINEMA 4K WIDESCREEN
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <iframe
+                    src={embeddedVideoUrl || undefined}
+                    title={`${project.title} video presentation`}
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                    className="h-full w-full border-0"
+                  />
+                )}
               </div>
             </div>
-          </div>
-        </section>
+          </section>
         )}
 
-        {/* SECTION 5 - EDITORIAL CAMPAIGN PHOTO GALLERY */}
         {project.gallery && project.gallery.length > 0 && (
           <section className="mb-28">
             <p className="font-mono text-[10px] tracking-[0.3em] text-[#737373] uppercase mb-8">CAMPAIGN LOOK DESIGN EXPOSURES</p>
-            
+
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {project.gallery.map((asset, i) => (
                 <div
@@ -243,11 +239,10 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
           </section>
         )}
 
-        {/* SECTION 6 - THE PRODUCTION TEAM INDEX */}
         {project.credits && project.credits.length > 0 && (
           <section className="mb-28 border-t border-white/5 pt-16">
             <p className="font-mono text-[10px] tracking-[0.3em] text-[#737373] uppercase mb-8">EXHIBIT REPRESENTATIVE CREDITS</p>
-            
+
             <div className="grid gap-8 grid-cols-2 lg:grid-cols-4">
               {project.credits.map((cr, i) => (
                 <div key={i} className="border-l border-white/10 pl-6 py-2 group hover:border-[#F9A136]/60 transition-all">
@@ -259,10 +254,9 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
           </section>
         )}
 
-        {/* SECTION 7 - NEXT PROJECT EMBEDDED FOOTER TEASER */}
         <section className="border-t border-white/5 pt-16 text-center">
           <p className="font-mono text-[10px] tracking-[0.3em] text-[#525252] uppercase mb-4">CONTINUOUS IMMERSION</p>
-          <div 
+          <div
             onClick={handleNextProjectClick}
             className="group cursor-pointer max-w-2xl mx-auto py-12 px-6 border border-white/5 bg-[#0a0a0a]/30 hover:bg-[#0c0c0c]/80 hover:border-[#F9A136]/40 transition-all duration-500 rounded-none block"
           >
@@ -276,10 +270,8 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
             </p>
           </div>
         </section>
-
       </div>
 
-      {/* FULLSCREEN LIGHTBOX DIALOG OVERLAY (Fullscreen Imagery Requirement) */}
       <AnimatePresence>
         {activeMediaIndex !== null && project.gallery && (
           <motion.div
@@ -288,9 +280,8 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/98 p-4 backdrop-blur-md"
           >
-            {/* Click backdrop to exit */}
             <div className="absolute inset-0 z-0" onClick={() => setActiveMediaIndex(null)} />
-            
+
             <button
               onClick={() => setActiveMediaIndex(null)}
               className="absolute top-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/60 text-white hover:border-[#F9A136] hover:text-[#F9A136] transition-colors"
@@ -311,24 +302,23 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
                 transition={{ duration: 0.35 }}
                 className="max-h-[75vh] object-contain border border-white/10"
               />
-              
+
               {project.gallery[activeMediaIndex].caption && (
                 <p className="mt-4 font-mono text-xs text-neutral-400 tracking-widest uppercase text-center max-w-lg bg-black/60 px-4 py-2 border border-white/5">
                   {project.gallery[activeMediaIndex].caption}
                 </p>
               )}
 
-              {/* Lightbox pagination controls */}
               <div className="mt-6 flex items-center space-x-6 text-neutral-500 font-mono text-xs">
                 <button
-                  onClick={() => setActiveMediaIndex((prev) => (prev! === 0 ? project.gallery!.length - 1 : prev! - 1))}
+                  onClick={() => setActiveMediaIndex((prev) => (prev === 0 ? project.gallery!.length - 1 : (prev ?? 0) - 1))}
                   className="hover:text-[#F9A136] transition-colors"
                 >
                   PREV
                 </button>
                 <span className="tracking-widest">{activeMediaIndex + 1} / {project.gallery.length}</span>
                 <button
-                  onClick={() => setActiveMediaIndex((prev) => (prev! === project.gallery!.length - 1 ? 0 : prev! + 1))}
+                  onClick={() => setActiveMediaIndex((prev) => (prev === project.gallery!.length - 1 ? 0 : (prev ?? 0) + 1))}
                   className="hover:text-[#F9A136] transition-colors"
                 >
                   NEXT
@@ -338,7 +328,6 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

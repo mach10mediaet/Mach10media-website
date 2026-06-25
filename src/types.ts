@@ -34,8 +34,8 @@ export interface Project {
   tagline: string;
   description: string;
   heroImage: string;
-  videoUrl?: string; // mp4 preview
-  fullVideoUrl?: string; // main featured video
+  videoUrl?: string; // optional preview video or hosted embed URL
+  fullVideoUrl?: string; // optional main featured video or hosted embed URL
   year: string;
   stats: ProjectStat[];
   credits: ProjectCredit[];
@@ -44,6 +44,8 @@ export interface Project {
   publishState?: 'draft' | 'published';
   featured?: boolean;
   archived?: boolean;
+  createdAt?: any;
+  updatedAt?: any;
   socialLinks?: {
     instagram?: string;
     vimeo?: string;

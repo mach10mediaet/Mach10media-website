@@ -279,7 +279,7 @@ export default function AdminDashboardView({
   const [description, setDescription] = useState('');
   const [campaignDetails, setCampaignDetails] = useState('');
   const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&q=90&w=2000');
-  const [videoUrl, setVideoUrl] = useState('https://assets.mixkit.co/videos/preview/mixkit-mechanical-watch-mechanism-close-up-vibe-40342-large.mp4');
+  const [videoUrl, setVideoUrl] = useState('');
   const [year, setYear] = useState('2026');
 
   // Stats builder
@@ -606,6 +606,7 @@ export default function AdminDashboardView({
     setIsFeatured(false);
     setIsArchived(false);
     setCatalogDriveTarget(null);
+    setSaveConfirmation(null);
     setFormGallery([
       { id: 'g-sub-1', type: 'image', url: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&q=90&w=2000', caption: 'Campaign Detail Study 1' },
       { id: 'g-sub-2', type: 'image', url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=90&w=1200', caption: 'Tactile Material Concept' }
@@ -631,6 +632,7 @@ export default function AdminDashboardView({
     setIsFeatured(Boolean(proj.featured));
     setIsArchived(Boolean(proj.archived));
     setCatalogDriveTarget(null);
+    setSaveConfirmation(null);
     setFormGallery(proj.gallery || []);
   };
 
@@ -662,6 +664,13 @@ export default function AdminDashboardView({
 
   // Cloud state trackers for button loader
   const [savingLoading, setSavingLoading] = useState(false);
+  const [saveConfirmation, setSaveConfirmation] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!saveConfirmation) return;
+    const timer = window.setTimeout(() => setSaveConfirmation(null), 4000);
+    return () => window.clearTimeout(timer);
+  }, [saveConfirmation]);
 
   // Handle Form Submission
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -725,13 +734,21 @@ export default function AdminDashboardView({
       projectPayload.createdAt = serverTimestamp();
     } else {
       const existingProj = projects.find(p => p.id === projectId);
-      // Attempt to preserve original createdAt if available
-      projectPayload.createdAt = (existingProj as any)?.createdAt || serverTimestamp();
+      // Preserve the original Firestore timestamp when editing so rules accept the overwrite.
+      projectPayload.createdAt = existingProj?.createdAt || editingProject?.createdAt || serverTimestamp();
+      if (existingProj?.socialLinks || editingProject?.socialLinks) {
+        projectPayload.socialLinks = existingProj?.socialLinks || editingProject?.socialLinks;
+      }
     }
 
     try {
       await setDoc(doc(db, 'projects', projectId), projectPayload);
-      
+      setSaveConfirmation(
+        editingProject
+          ? `Exhibit updated successfully: ${title}`
+          : `New exhibit saved successfully: ${title}`
+      );
+
       // Reset pane state
       setEditingProject(null);
       setIsAddingNew(false);
@@ -1019,6 +1036,11 @@ export default function AdminDashboardView({
 
         {/* MAIN MODULE CONTENT AREA */}
         <main className="lg:col-span-3">
+          {saveConfirmation && (
+            <div className="mb-6 rounded border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+              {saveConfirmation}
+            </div>
+          )}
           
           {/* CONTROL SECTION 1: ADD OR EXPORT PANE */}
           {editingProject || isAddingNew ? (
@@ -1165,11 +1187,11 @@ export default function AdminDashboardView({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-mono text-[9px] text-neutral-500 uppercase tracking-wider">PREVIEW VIDEO / TRAILER URL</label>
+                  <label className="font-mono text-[9px] text-neutral-500 uppercase tracking-wider">OPTIONAL VIDEO URL</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="Provide mp4 link"
+                      placeholder="Paste mp4, YouTube, or Vimeo link"
                       value={videoUrl}
                       onChange={(e) => setVideoUrl(e.target.value)}
                       className="w-full rounded border border-white/10 bg-black/40 px-3 py-2 text-sm focus:border-white focus:outline-none text-xs"

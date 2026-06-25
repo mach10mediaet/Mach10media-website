@@ -3,6 +3,11 @@ import { ArrowDown, ArrowUpRight, Play, Quote, ChevronLeft, ChevronRight, Activi
 import { motion, AnimatePresence } from 'motion/react';
 import { Project, ActiveView } from '../types';
 import heroVideo from '../assets/Hero.mp4';
+import brandIdentityImage from '../assets/brand-identity-and-design-system.jpeg';
+import commercialPhotographyImage from '../assets/commerical-photography.jpeg';
+import foodPhotographyImage from '../assets/food-photography.jpg';
+import servicePlaceholderImage from '../assets/service-placeholder.svg';
+import { isDirectVideoUrl } from '../utils/video';
 
 interface HomeViewProps {
   projects: Project[];
@@ -14,6 +19,11 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
   const [activeServiceHover, setActiveServiceHover] = useState<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
+
+  const handleScrollToContent = () => {
+    const nextSection = document.getElementById('logos-marquee-section');
+    nextSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   // Playback control
   const togglePlay = () => {
@@ -31,22 +41,22 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const testimonials = [
     {
-      quote: "Mach10 Media didn't just film a commercial for us; they crafted a visual monument. Our brand authority and customer trust rose to record heights.",
-      author: "Marc-Antoine Laurent",
-      role: "Global Communications Chief, Chronos Swiss",
-      company: "CHRONOS SWISS"
+      quote: "Mach10 Media transformed our vision into a strong brand identity. From the logo to the packaging, every detail exceeded our expectations.",
+      author: "Natnael Mebratu",
+      role: "Manager of FMT",
+      company: "FMT"
     },
     {
-      quote: "Elena and her creative directors operate on a completely different sensory level. They designed every shadow, frame, and whisper to perfection.",
-      author: "Sylvia de la Vega",
-      role: "Creative Director, Maison Noir House",
-      company: "MAISON NOIR"
+      quote: "Mach10 Media consistently delivers high-quality photo, video, and social media content that has strengthened our online presence.",
+      author: "Khalid Abdu",
+      role: "Manager and Founder of RakaCars",
+      company: "RAKA CARS"
     },
     {
-      quote: "The visual narratives produced during our summer campaign brought a 7.2% conversion spike. Utterly professional and editorial.",
-      author: "Christoph Becker",
-      role: "VP of Guest Experiences, Oasis Resorts Group",
-      company: "OASIS LUXURY RESORTS"
+      quote: "Their content perfectly captures our restaurant’s atmosphere and has helped us build a stronger presence on social media.",
+      author: "Zelalem Maru",
+      role: "Owner of Olive & Bread",
+      company: "OLIVE & BREAD"
     }
   ];
 
@@ -64,41 +74,41 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
       id: 0,
        idAttr: "service-branding",
       num: '01',
-      title: 'Branding & Design Language',
-      desc: 'Forging visual monoliths through bespoke typography, architectural styling guidelines, and strict negative space discipline.',
-      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1000'
+      title: 'BRAND IDENTITY & DESIGN SYSTEMS',
+      desc: 'Building clean, memorable visual identities through logos, color systems, typography, brand guidelines, packaging, profiles, and marketing materials.',
+      image: brandIdentityImage
     },
     {
       id: 1,
        idAttr: "service-commercial",
       num: '02',
-      title: 'Commercial Film Production',
-      desc: 'Cinematic storytelling filmed using premium vintage anamorphic glass. Handled end-to-end, from storyboard to final color mapping.',
-      image: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=1000'
+      title: 'FOOD PHOTOGRAPHY',
+      desc: 'Creating clean, appetizing photo assets for restaurants, cafés, bakeries, and food brands with a focus on lighting, styling, composition, and visual consistency across menus, social media, and campaigns.',
+      image: foodPhotographyImage
     },
     {
       id: 2,
        idAttr: "service-photography",
       num: '03',
-      title: 'High-Fashion Photography',
-      desc: 'Chiaroscuro and high-contrast studio work. Documenting garments and human geometry for leading international magazines.',
-      image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=1000'
+      title: 'COMMERCIAL PHOTOGRAPHY',
+      desc: 'Creating high-quality photo assets for food, products, spaces, people, events, and campaigns, with a focus on lighting, composition, and brand consistency.',
+      image: commercialPhotographyImage
     },
     {
       id: 3,
        idAttr: "service-social",
       num: '04',
-      title: 'Social Media Strategy',
-      desc: 'Creating high-fidelity, native vertical micro-films that gain global organic traction on social algorithms.',
-      image: 'https://images.unsplash.com/photo-1483721310020-03333e577078?auto=format&fit=crop&q=80&w=1000'
+      title: 'SOCIAL MEDIA CONTENT & MANAGEMENT',
+      desc: 'Planning, creating, captioning, scheduling, and managing content for Instagram, TikTok, Facebook, LinkedIn, and other platforms with a clear monthly direction.',
+      image: servicePlaceholderImage
     },
     {
       id: 4,
        idAttr: "service-creative",
       num: '05',
-      title: 'Creative Direction Consulting',
-      desc: 'Positioning legacy products as cultural landmarks. Advising boards on sensory communications and mood strategies.',
-      image: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=1000'
+      title: 'EVENT COVERAGE & BRAND CAMPAIGNS',
+      desc: 'Capturing launches, conferences, activations, openings, and brand moments through photo, video, reels, recap films, and campaign-ready content packages.',
+      image: servicePlaceholderImage
     }
   ];
 
@@ -154,7 +164,9 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
             </h1>
             
             <p className="mt-6 md:mt-8 max-w-md font-sans text-xs sm:text-[16px] font-light leading-relaxed text-neutral-400">
-              We are an award-winning boutique media, marketing and production shop. We construct luxury aesthetic structures that resonate globally through high-contrast film, photography, and branding.
+              Mach10 Media is a media, marketing, and production team based in Addis Ababa. We help brands create strong visuals, clear stories, and thoughtful campaigns across film, photography, branding, and social media.
+
+Our work is built around clean execution, intentional design, and content that feels true to the brand. We aim to create visuals that look good, communicate clearly, and help businesses connect with the right audience.
             </p>
           </div>
 
@@ -192,12 +204,17 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
                 <span>{isPlaying ? 'Mute Reel' : 'Play Reel'}</span>
               </button>
 
-              <div className="flex items-center space-x-4 text-neutral-500 transition-colors cursor-pointer group hover:text-[#F9A136]">
+              <button
+                type="button"
+                onClick={handleScrollToContent}
+                className="flex items-center space-x-4 text-neutral-500 transition-colors cursor-pointer group hover:text-[#F9A136]"
+                id="hero-scroll-enter-button"
+              >
                 <span className="font-mono text-[12px] tracking-[0.25em] uppercase">Scroll to enter</span>
                 <div className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-800 animate-bounce group-hover:border-[#F9A136]/50">
                   <ArrowDown className="h-4 w-4" />
                 </div>
-              </div>
+              </button>
             </div>
           </div>
         </div>
@@ -279,7 +296,7 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
                   />
                   
                   {/* Underneath Hover looping video snippet (Cinematic feature) */}
-                  {proj.videoUrl && (
+                  {isDirectVideoUrl(proj.videoUrl) && (
                     <video
                       src={proj.videoUrl}
                       autoPlay
@@ -389,7 +406,7 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
                         animate={{ opacity: 0.85, scale: 1 }}
                         exit={{ opacity: 0, scale: 1.05 }}
                         transition={{ duration: 0.45, ease: 'easeOut' }}
-                        className="absolute inset-0 h-full w-full object-cover grayscale saturate-[0.1] brightness-90"
+                        className="absolute inset-0 h-full w-full object-cover saturate-100 brightness-90"
                       />
                     ) : (
                       <motion.div
@@ -414,71 +431,7 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
         </div>
       </section>
 
-      {/* SECTION 5 — BEHIND THE SCENES GALLERY (MASONRY GRID) */}
-      <section 
-        id="bts-grid-section" 
-        className="mx-auto max-w-7xl px-6 py-24 md:px-12 md:py-32"
-      >
-        <p className="font-mono text-[12px] tracking-[0.3em] text-[#7a7a7a] uppercase mb-4">THE LAB IN MOTION</p>
-        <div className="mb-16 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <h2 className="font-sans text-4xl font-extralight tracking-tighter text-[#f2f2f2] sm:text-5xl uppercase">
-            on-shoot studio artifacts
-          </h2>
-          <p className="max-w-xs font-sans text-base font-light leading-relaxed text-[#a3a3a3]">
-            Captured in raw grain format. Real scenes, real lighting configurations, real production craft variables.
-          </p>
-        </div>
-
-        {/* Masonry image stack with beautiful minimalism spacing */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-          <div className="relative aspect-[3/4] overflow-hidden bg-neutral-950 p-2.5 border border-white/5 group">
-            <div className="w-full h-full overflow-hidden relative">
-              <img 
-                src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&q=80&w=600" 
-                alt="BTS camera sensor setup" 
-                referrerPolicy="no-referrer"
-                className="h-full w-full object-cover grayscale transition-all duration-1000 group-hover:scale-105 group-hover:grayscale-0 saturate-50"
-              />
-              <span className="absolute bottom-2.5 left-3 font-mono text-[12px] text-white/50 bg-[#080808]/80 rounded-full px-2.5 py-1 backdrop-blur-sm">Leica M6 - Rome</span>
-            </div>
-          </div>
-          <div className="relative aspect-square overflow-hidden bg-neutral-950 p-2.5 border border-white/5 md:translate-y-6 group">
-            <div className="w-full h-full overflow-hidden relative">
-              <img 
-                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=600" 
-                alt="Concrete monolithic lines" 
-                referrerPolicy="no-referrer"
-                className="h-full w-full object-cover grayscale transition-all duration-1000 group-hover:scale-105 group-hover:grayscale-0 saturate-50"
-              />
-              <span className="absolute bottom-2.5 left-3 font-mono text-[12px] text-white/50 bg-[#080808]/80 rounded-full px-2.5 py-1 backdrop-blur-sm">Abstract shadows</span>
-            </div>
-          </div>
-          <div className="relative aspect-[4/5] overflow-hidden bg-neutral-950 p-2.5 border border-white/5 group">
-            <div className="w-full h-full overflow-hidden relative">
-              <img 
-                src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=600" 
-                alt="Vintage visual elements roll" 
-                referrerPolicy="no-referrer"
-                className="h-full w-full object-cover grayscale transition-all duration-1000 group-hover:scale-105 group-hover:grayscale-0 saturate-50"
-              />
-              <span className="absolute bottom-2.5 left-3 font-mono text-[12px] text-white/50 bg-[#080808]/80 rounded-full px-2.5 py-1 backdrop-blur-sm">Arri Mini LF reel</span>
-            </div>
-          </div>
-          <div className="relative aspect-[3/4] overflow-hidden bg-neutral-950 p-2.5 border border-white/5 md:translate-y-12 group">
-            <div className="w-full h-full overflow-hidden relative">
-              <img 
-                src="https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?auto=format&fit=crop&q=80&w=600" 
-                alt="Light leaks on on-set stairs" 
-                referrerPolicy="no-referrer"
-                className="h-full w-full object-cover grayscale transition-all duration-1000 group-hover:scale-105 group-hover:grayscale-0 saturate-50"
-              />
-              <span className="absolute bottom-2.5 left-3 font-mono text-[12px] text-white/50 bg-[#080808]/80 rounded-full px-2.5 py-1 backdrop-blur-sm">Geneva Office</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 6 — TESTIMONIALS (ANIMATED CHANGER) */}
+      {/* SECTION 5 — TESTIMONIALS (ANIMATED CHANGER) */}
       <section 
         id="testimonials-slider-section" 
         className="border-t border-white/5 bg-[#090909]/40 py-24 md:py-32 mt-12 md:mt-16"
@@ -536,7 +489,7 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
         </div>
       </section>
 
-      {/* SECTION 7 — CALL TO CONTACT ACTION */}
+      {/* SECTION 6 — CALL TO CONTACT ACTION */}
       <section 
         id="homepage-contact-cta" 
         className="relative flex min-h-[550px] items-center justify-center bg-transparent px-6 py-28 text-center"
@@ -551,7 +504,7 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
           
           <button
             onClick={() => onNavigate('contact')}
-            className="group relative inline-flex items-center justify-center overflow-hidden border border-transparent rounded-full bg-white px-8 py-4 font-mono text-base font-bold tracking-widest text-[#080808] uppercase transition-all duration-500 hover:bg-[#F9A136] hover:scale-105"
+            className="group relative inline-flex items-center justify-center overflow-hidden rounded-full border border-transparent bg-white px-6 py-3.5 font-mono text-sm font-bold tracking-[0.22em] text-[#080808] uppercase transition-all duration-500 hover:scale-105 hover:bg-[#F9A136]"
             id="cta-bottom-booking"
           >
             <span>Retain Mach10 Media</span>

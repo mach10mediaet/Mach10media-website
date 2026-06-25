@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowUpRight, Play, Filter, Sparkles, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Project, ProjectCategory } from '../types';
+import { isDirectVideoUrl } from '../utils/video';
 
 interface WorkViewProps {
   projects: Project[];
@@ -14,7 +15,6 @@ export default function WorkView({ projects, onNavigateToProject }: WorkViewProp
   const categories: string[] = [
     'All',
     'Photography',
-    'Commercial',
     'Branding',
     'Social Media',
     'Food Content',
@@ -120,7 +120,7 @@ export default function WorkView({ projects, onNavigateToProject }: WorkViewProp
                     />
 
                     {/* Interactive video trailer on hover */}
-                    {proj.videoUrl && (
+                    {isDirectVideoUrl(proj.videoUrl) && (
                       <video
                         src={proj.videoUrl}
                         autoPlay

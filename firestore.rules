@@ -35,8 +35,8 @@ service cloud.firestore {
 
     // Complete validation blueprint - protects against shadow values or out-of-bound strings/lists
     function isValidProject(data) {
-      return data.keys().hasAll(['id', 'title', 'alias', 'client', 'category', 'tagline', 'description', 'heroImage', 'year', 'campaignDetails', 'stats', 'credits', 'gallery', 'publishState', 'featured', 'archived']) &&
-             data.keys().size() <= 19 &&
+      return data.keys().hasOnly(['id', 'title', 'alias', 'client', 'category', 'tagline', 'description', 'heroImage', 'videoUrl', 'fullVideoUrl', 'year', 'campaignDetails', 'stats', 'credits', 'gallery', 'publishState', 'featured', 'archived', 'createdAt', 'updatedAt', 'socialLinks']) &&
+             data.keys().hasAll(['id', 'title', 'alias', 'client', 'category', 'tagline', 'description', 'heroImage', 'year', 'campaignDetails', 'stats', 'credits', 'gallery', 'publishState', 'featured', 'archived', 'createdAt', 'updatedAt']) &&
              data.id is string && data.id.size() <= 100 &&
              data.title is string && data.title.size() <= 100 &&
              data.alias is string && data.alias.size() <= 100 &&
