@@ -118,11 +118,23 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
     'CRAVINGS', 'ILLY', 'WEGUS ', 'ROMINA'
   ];
 
-  // Pick top featured projects first, then backfill with the rest.
-  const featuredProjects = [
-    ...projects.filter((project) => project.featured),
-    ...projects.filter((project) => !project.featured)
-  ].slice(0, 3);
+  const getProjectTimestamp = (value: any) => {
+    if (typeof value?.toMillis === 'function') return value.toMillis();
+    return value instanceof Date ? value.getTime() : 0;
+  };
+
+  // Feature selections take priority, with the most recently updated exhibits shown first.
+  const featuredProjects = [...projects]
+    .sort((first, second) => {
+      if (Boolean(first.featured) !== Boolean(second.featured)) {
+        return Number(Boolean(second.featured)) - Number(Boolean(first.featured));
+      }
+
+      const firstUpdated = getProjectTimestamp(first.updatedAt) || getProjectTimestamp(first.createdAt);
+      const secondUpdated = getProjectTimestamp(second.updatedAt) || getProjectTimestamp(second.createdAt);
+      return secondUpdated - firstUpdated;
+    })
+    .slice(0, 3);
 
   return (
     <div className="bg-transparent text-[#f2f2f2]">

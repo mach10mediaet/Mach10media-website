@@ -1546,31 +1546,62 @@ export default function AdminDashboardView({
                   )}
                 </div>
 
-                <div className="flex flex-col gap-4 border border-white/5 bg-[#121212]/50 p-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="font-mono text-[9px] uppercase tracking-wider text-neutral-300">Feature on home page</p>
-                    <p className="mt-1 text-xs leading-relaxed text-neutral-500">
-                      Featured published exhibits are prioritized in the home page portfolio section.
-                    </p>
+                <div className="space-y-4 border border-white/5 bg-[#121212]/50 p-4">
+                  <div className="flex items-center justify-between gap-5 border-b border-white/5 pb-4">
+                    <div>
+                      <p className="font-mono text-[9px] uppercase tracking-wider text-neutral-300">Public website</p>
+                      <p className="mt-1 text-xs text-neutral-500">{publishState === 'published' ? 'Published and visible to visitors' : 'Draft, visible only in the admin area'}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`font-mono text-[9px] uppercase tracking-widest ${publishState === 'published' ? 'text-emerald-300' : 'text-neutral-500'}`}>
+                        {publishState === 'published' ? 'Published' : 'Draft'}
+                      </span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={publishState === 'published'}
+                        aria-label="Toggle public website visibility"
+                        onClick={() => setPublishState((current) => current === 'published' ? 'draft' : 'published')}
+                        className={`relative h-7 w-12 shrink-0 rounded-full border transition-colors ${
+                          publishState === 'published'
+                            ? 'border-emerald-400 bg-emerald-500'
+                            : 'border-white/20 bg-black/50'
+                        }`}
+                      >
+                        <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-transform ${publishState === 'published' ? 'translate-x-6' : 'translate-x-1'}`} />
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={isFeatured}
-                    aria-label="Feature this exhibit on the home page"
-                    onClick={() => setIsFeatured((current) => !current)}
-                    className={`relative h-7 w-12 shrink-0 border transition-colors ${
-                      isFeatured
-                        ? 'border-[#F9A136] bg-[#F9A136]'
-                        : 'border-white/20 bg-black/50'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 h-5 w-5 bg-white transition-transform ${
-                        isFeatured ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
+
+                  <div className="flex items-center justify-between gap-5">
+                    <div>
+                      <p className="font-mono text-[9px] uppercase tracking-wider text-neutral-300">Feature on home page</p>
+                      <p className="mt-1 text-xs text-neutral-500">Selected exhibits appear first in the home-page portfolio section.</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`font-mono text-[9px] uppercase tracking-widest ${isFeatured ? 'text-[#F9A136]' : 'text-neutral-500'}`}>
+                        {isFeatured ? 'Featured' : 'Standard'}
+                      </span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={isFeatured}
+                        aria-label="Feature this exhibit on the home page"
+                        onClick={() => {
+                          const nextFeatured = !isFeatured;
+                          setIsFeatured(nextFeatured);
+                          if (nextFeatured) setPublishState('published');
+                        }}
+                        className={`relative h-7 w-12 shrink-0 rounded-full border transition-colors ${
+                          isFeatured
+                            ? 'border-[#F9A136] bg-[#F9A136]'
+                            : 'border-white/20 bg-black/50'
+                        }`}
+                      >
+                        <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-transform ${isFeatured ? 'translate-x-6' : 'translate-x-1'}`} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* ADVANCED STATS ASSEMBLER (Notion-style interactive stats setter) */}
