@@ -777,6 +777,21 @@ export default function AdminDashboardView({
     }
   };
 
+  const handlePermanentlyDeleteProject = async (proj: Project) => {
+    if (!confirm(`Permanently delete "${proj.title}"? This cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, 'projects', proj.id));
+      setSaveConfirmation(`Exhibit permanently deleted: ${proj.title}`);
+    } catch (err) {
+      console.error(err);
+      handleFirestoreError(err, OperationType.DELETE, `projects/${proj.id}`);
+      alert('Could not permanently delete this exhibit. Confirm your admin account still has database access.');
+    }
+  };
+
   const handleDeleteInquiry = async (inquiryId: string, inquiryLabel: string) => {
     if (!confirm(`Delete inquiry from "${inquiryLabel}" permanently?`)) {
       return;
@@ -1612,6 +1627,16 @@ export default function AdminDashboardView({
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
+                      {proj.archived && (
+                        <button
+                          onClick={() => handlePermanentlyDeleteProject(proj)}
+                          className="flex h-8 w-8 items-center justify-center border border-red-500/20 bg-red-950/20 text-red-300 hover:border-red-400 hover:bg-red-500 hover:text-white"
+                          title="Delete permanently"
+                          id={`permanent-delete-btn-${proj.id}`}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
