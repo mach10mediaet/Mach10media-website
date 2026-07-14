@@ -2267,9 +2267,6 @@ export default function AdminDashboardView({
                         <div className="border border-green-500/10 bg-green-500/5 p-3 rounded">
                           <p className="font-mono text-[9.5px] font-bold text-green-400 uppercase tracking-widest">ADMIN CONNECTOR ON</p>
                           <p className="font-sans text-[11px] text-neutral-300 mt-0.5 truncate">{firebaseUser.email}</p>
-                          {firebaseUser.email !== 'Besofekad@gmail.com' && (
-                            <p className="font-sans text-[9px] text-red-400 mt-1">Warning: Only Besofekad@gmail.com has cloud write permissions.</p>
-                          )}
                         </div>
                         <button
                           type="button"

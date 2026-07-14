@@ -12,11 +12,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Bootstrapped admin verification - strictly authorizes the verified developer email
+    // Only verified Google accounts in this allowlist may manage portfolio data.
     function isAdmin() {
       return isSignedIn() && 
              (request.auth.token.email == "Besofekad@gmail.com" ||
-              request.auth.token.email == "besofekad@gmail.com") && 
+              request.auth.token.email == "besofekad@gmail.com" ||
+              request.auth.token.email == "habte919@gmail.com") && 
              request.auth.token.email_verified == true;
     }
 

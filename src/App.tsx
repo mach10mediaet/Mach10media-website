@@ -8,6 +8,8 @@ import HomeView from './components/HomeView';
 const WorkView = lazy(() => import('./components/WorkView'));
 const ServicesView = lazy(() => import('./components/ServicesView'));
 const ProjectTemplateView = lazy(() => import('./components/ProjectTemplateView'));
+
+const ADMIN_EMAILS = new Set(['besofekad@gmail.com', 'habte919@gmail.com']);
 const AboutView = lazy(() => import('./components/AboutView'));
 const ContactView = lazy(() => import('./components/ContactView'));
 const AdminDashboardView = lazy(() => import('./components/AdminDashboardView'));
@@ -94,7 +96,7 @@ export default function App() {
   const handleAuthenticateAdmin = async () => {
     const result = await signInWithGoogle();
     const email = result.user?.email?.toLowerCase();
-    if (email !== 'besofekad@gmail.com') {
+    if (!email || !ADMIN_EMAILS.has(email)) {
       await signOut(auth);
       pushDiagnosticEvent({
         source: 'auth',
@@ -288,7 +290,7 @@ export default function App() {
       case 'contact':
         return <ContactView />;
       case 'admin':
-        if (!firebaseUser || firebaseUser.email?.toLowerCase() !== 'besofekad@gmail.com') {
+        if (!firebaseUser || !ADMIN_EMAILS.has(firebaseUser.email?.toLowerCase() || '')) {
           return (
             <AdminLockGate 
               onAuthenticate={handleAuthenticateAdmin} 
@@ -310,7 +312,7 @@ export default function App() {
           />
         );
       case 'upload':
-        if (!firebaseUser || firebaseUser.email?.toLowerCase() !== 'besofekad@gmail.com') {
+        if (!firebaseUser || !ADMIN_EMAILS.has(firebaseUser.email?.toLowerCase() || '')) {
           return (
             <AdminLockGate 
               onAuthenticate={handleAuthenticateAdmin} 
