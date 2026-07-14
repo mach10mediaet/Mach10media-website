@@ -1546,6 +1546,33 @@ export default function AdminDashboardView({
                   )}
                 </div>
 
+                <div className="flex flex-col gap-4 border border-white/5 bg-[#121212]/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="font-mono text-[9px] uppercase tracking-wider text-neutral-300">Feature on home page</p>
+                    <p className="mt-1 text-xs leading-relaxed text-neutral-500">
+                      Featured published exhibits are prioritized in the home page portfolio section.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={isFeatured}
+                    aria-label="Feature this exhibit on the home page"
+                    onClick={() => setIsFeatured((current) => !current)}
+                    className={`relative h-7 w-12 shrink-0 border transition-colors ${
+                      isFeatured
+                        ? 'border-[#F9A136] bg-[#F9A136]'
+                        : 'border-white/20 bg-black/50'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-1 h-5 w-5 bg-white transition-transform ${
+                        isFeatured ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+
                 {/* ADVANCED STATS ASSEMBLER (Notion-style interactive stats setter) */}
                 <div className="border border-white/5 bg-[#121212]/50 p-4 rounded-md space-y-4">
                   <p className="font-mono text-[9px] text-neutral-400 uppercase tracking-wider">PROJECT STATISTICS (OUTCOMES PANEL) ({stats.length})</p>
