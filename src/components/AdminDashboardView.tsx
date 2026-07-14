@@ -665,6 +665,10 @@ export default function AdminDashboardView({
   // Cloud state trackers for button loader
   const [savingLoading, setSavingLoading] = useState(false);
   const [saveConfirmation, setSaveConfirmation] = useState<string | null>(null);
+  const [projectActionConfirmation, setProjectActionConfirmation] = useState<{
+    project: Project;
+    action: 'archive' | 'restore' | 'delete';
+  } | null>(null);
 
   useEffect(() => {
     if (!saveConfirmation) return;
@@ -761,34 +765,44 @@ export default function AdminDashboardView({
     }
   };
 
-  // Project deletion
-  const handleDeleteProject = async (projId: string, nextArchivedState: boolean) => {
-    if (confirm(nextArchivedState ? 'Archive this project exhibit?' : 'Restore this archived project exhibit?')) {
-      try {
-        await updateDoc(doc(db, 'projects', projId), {
-          archived: nextArchivedState,
-          updatedAt: serverTimestamp()
-        });
-      } catch (err) {
-        console.error(err);
-        handleFirestoreError(err, OperationType.UPDATE, `projects/${projId}`);
-        alert('Security friction: Permission Denied. Check your admin credentials status underneath "Access & Security".');
-      }
-    }
+  const handleDeleteProject = (proj: Project, nextArchivedState: boolean) => {
+    setProjectActionConfirmation({
+      project: proj,
+      action: nextArchivedState ? 'archive' : 'restore'
+    });
   };
 
-  const handlePermanentlyDeleteProject = async (proj: Project) => {
-    if (!confirm(`Permanently delete "${proj.title}"? This cannot be undone.`)) {
-      return;
-    }
+  const handlePermanentlyDeleteProject = (proj: Project) => {
+    setProjectActionConfirmation({ project: proj, action: 'delete' });
+  };
+
+  const confirmProjectAction = async () => {
+    if (!projectActionConfirmation) return;
+
+    const { project, action } = projectActionConfirmation;
+    setProjectActionConfirmation(null);
 
     try {
-      await deleteDoc(doc(db, 'projects', proj.id));
-      setSaveConfirmation(`Exhibit permanently deleted: ${proj.title}`);
+      if (action === 'delete') {
+        await deleteDoc(doc(db, 'projects', project.id));
+        setSaveConfirmation(`Exhibit permanently deleted: ${project.title}`);
+        return;
+      }
+
+      const archived = action === 'archive';
+      await updateDoc(doc(db, 'projects', project.id), {
+        archived,
+        updatedAt: serverTimestamp()
+      });
+      setSaveConfirmation(`${archived ? 'Exhibit archived' : 'Exhibit restored'}: ${project.title}`);
     } catch (err) {
       console.error(err);
-      handleFirestoreError(err, OperationType.DELETE, `projects/${proj.id}`);
-      alert('Could not permanently delete this exhibit. Confirm your admin account still has database access.');
+      handleFirestoreError(
+        err,
+        action === 'delete' ? OperationType.DELETE : OperationType.UPDATE,
+        `projects/${project.id}`
+      );
+      alert('Could not update this exhibit. Confirm your admin account still has database access.');
     }
   };
 
@@ -982,6 +996,67 @@ export default function AdminDashboardView({
 
   return (
     <div className="bg-transparent min-h-screen text-[#f2f2f2] pt-28">
+      {projectActionConfirmation && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 px-6 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="project-action-confirmation-title"
+        >
+          <div className="w-full max-w-md border border-white/10 bg-[#0c0c0c] p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-6">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-red-500/30 bg-red-500/10 text-red-300">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <button
+                type="button"
+                onClick={() => setProjectActionConfirmation(null)}
+                className="text-neutral-500 transition-colors hover:text-white"
+                aria-label="Close confirmation"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <h2 id="project-action-confirmation-title" className="mt-6 font-sans text-xl text-white">
+              {projectActionConfirmation.action === 'delete'
+                ? 'Delete exhibit permanently?'
+                : projectActionConfirmation.action === 'archive'
+                  ? 'Archive this exhibit?'
+                  : 'Restore this exhibit?'}
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-neutral-400">
+              <span className="text-neutral-200">{projectActionConfirmation.project.title}</span>
+              {projectActionConfirmation.action === 'delete'
+                ? ' will be removed from the database and cannot be recovered.'
+                : projectActionConfirmation.action === 'archive'
+                  ? ' will be removed from the public portfolio but kept in the roster.'
+                  : ' will return to the public portfolio.'}
+            </p>
+
+            <div className="mt-7 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setProjectActionConfirmation(null)}
+                className="border border-white/15 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-neutral-300 transition-colors hover:border-white hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmProjectAction}
+                className="bg-red-500 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-white transition-colors hover:bg-red-400"
+              >
+                {projectActionConfirmation.action === 'delete'
+                  ? 'Delete permanently'
+                  : projectActionConfirmation.action === 'archive'
+                    ? 'Archive exhibit'
+                    : 'Restore exhibit'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="mx-auto max-w-7xl px-6 md:px-12 grid gap-10 lg:grid-cols-4 py-8">
         
         {/* SIDEBAR NAVIGATION GRID */}
@@ -1620,7 +1695,7 @@ export default function AdminDashboardView({
                         <Edit3 className="h-3.5 w-3.5" />
                       </button>
                       <button
-                        onClick={() => handleDeleteProject(proj.id, !Boolean(proj.archived))}
+                        onClick={() => handleDeleteProject(proj, !Boolean(proj.archived))}
                         className="flex h-8 w-8 items-center justify-center border border-white/5 bg-transparent text-neutral-400 hover:border-red-500/20 hover:text-red-400"
                         title={proj.archived ? 'Restore Project' : 'Archive Project'}
                         id={`delete-btn-${proj.id}`}
