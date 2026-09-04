@@ -1,30 +1,33 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Project, 
-  ProjectCategory, 
-  ProjectStat, 
-  ProjectCredit, 
+import {
+  Project,
+  ProjectCategory,
+  ProjectStat,
+  ProjectCredit,
   MediaAsset,
-  AppDiagnosticEvent
+  AppDiagnosticEvent,
+  MemberProfile,
+  TeamMember,
+  WorkCategory
 } from '../types';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
-import { collection, doc, setDoc, deleteDoc, onSnapshot, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, deleteDoc, onSnapshot, orderBy, query, serverTimestamp, updateDoc, where, limit } from 'firebase/firestore';
 import { db, auth, handleFirestoreError, OperationType, signInWithGoogle, getAccessToken, setAccessToken, firebaseProjectId, firestoreDatabaseLabel } from '../firebase';
-import { 
-  LayoutDashboard, 
-  PlusCircle, 
-  Image as ImageIcon, 
-  Search, 
-  Trash2, 
-  Edit3, 
-  Upload, 
-  FileVideo, 
-  CheckCircle, 
-  AlertCircle, 
-  FolderPlus, 
-  X, 
-  Layers, 
-  Calendar, 
+import {
+  LayoutDashboard,
+  PlusCircle,
+  Image as ImageIcon,
+  Search,
+  Trash2,
+  Edit3,
+  Upload,
+  FileVideo,
+  CheckCircle,
+  AlertCircle,
+  FolderPlus,
+  X,
+  Layers,
+  Calendar,
   Sparkles,
   Link as LinkIcon,
   Lock,
@@ -36,9 +39,25 @@ import {
   RefreshCw,
   FileText,
   Library,
-  Inbox
+  Inbox,
+  Timer,
+  CalendarClock,
+  ClipboardList,
+  Users,
+  ClipboardCheck,
+  BarChart3,
+  UserCog,
+  Briefcase
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import TimerView from './worklog/TimerView';
+import ManualEntryForm from './worklog/ManualEntryForm';
+import MyEntries from './worklog/MyEntries';
+import TeamStatus from './worklog/TeamStatus';
+import ApprovalsList from './worklog/ApprovalsList';
+import Reports from './worklog/Reports';
+import TeamAdmin from './worklog/TeamAdmin';
+import CategoriesAdmin from './worklog/CategoriesAdmin';
 
 interface AdminDashboardViewProps {
   projects: Project[];
@@ -50,6 +69,7 @@ interface AdminDashboardViewProps {
   onLogOut: () => void;
   diagnosticEvents: AppDiagnosticEvent[];
   projectsError: string | null;
+  memberProfile: MemberProfile;
 }
 
 interface InquiryRecord {
@@ -97,8 +117,8 @@ const validatePublicMediaUrl = (value: string, label: string) => {
   return null;
 };
 
-export default function AdminDashboardView({ 
-  projects, 
+export default function AdminDashboardView({
+  projects,
   setProjects,
   activeView,
   onNavigate,
@@ -106,29 +126,114 @@ export default function AdminDashboardView({
   setAdminSlug,
   onLogOut,
   diagnosticEvents,
-  projectsError
+  projectsError,
+  memberProfile
 }: AdminDashboardViewProps) {
+  const isWorklogAdmin = memberProfile.role === 'admin';
+
+  type DashboardTab =
+    | 'admin' | 'upload' | 'inquiries' | 'security'
+    | 'timer' | 'missed' | 'entries' | 'team-status' | 'approvals' | 'reports'
+    | 'team' | 'categories';
+
   // Local sub-tab state so they can toggle local view panels smoothly
-  const [localTab, setLocalTab] = useState<'admin' | 'upload' | 'inquiries' | 'security'>(
-    activeView === 'upload' ? 'upload' : 'admin'
+  const [localTab, setLocalTab] = useState<DashboardTab>(
+    isWorklogAdmin ? (activeView === 'upload' ? 'upload' : 'admin') : 'timer'
   );
 
   // Sync with prop navigation changes
   React.useEffect(() => {
+    if (!isWorklogAdmin) {
+      setLocalTab('timer');
+      return;
+    }
     if (activeView === 'upload') {
       setLocalTab('upload');
     } else {
       setLocalTab('admin');
     }
-  }, [activeView]);
+  }, [activeView, isWorklogAdmin]);
+
+  // Work-log reference data — readable by every active member per the Firestore rules.
+  const [clients, setClients] = useState<WorkCategory[]>([]);
+  const [workTypes, setWorkTypes] = useState<WorkCategory[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [pendingOthersCount, setPendingOthersCount] = useState(0);
+
+  React.useEffect(() => {
+    const toCategories = (snapshot: { forEach: (cb: (docSnap: { id: string; data: () => Record<string, unknown> }) => void) => void }): WorkCategory[] => {
+      const out: WorkCategory[] = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        out.push({
+          id: docSnap.id,
+          name: typeof data.name === 'string' ? data.name : '',
+          isActive: Boolean(data.isActive),
+          createdAt: data.createdAt
+        });
+      });
+      return out;
+    };
+
+    const unsubClients = onSnapshot(collection(db, 'clients'), (snap) => setClients(toCategories(snap)));
+    const unsubTypes = onSnapshot(collection(db, 'work_types'), (snap) => setWorkTypes(toCategories(snap)));
+
+    const unsubMembers = onSnapshot(collection(db, 'team_members'), (snapshot) => {
+      const out: TeamMember[] = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        out.push({
+          id: docSnap.id,
+          fullName: typeof data.fullName === 'string' && data.fullName ? data.fullName : docSnap.id,
+          role: data.role === 'admin' ? 'admin' : 'employee',
+          isActive: Boolean(data.isActive),
+          createdAt: data.createdAt
+        });
+      });
+      setTeamMembers(out);
+    });
+
+    const unsubPending = onSnapshot(
+      query(collection(db, 'time_entries'), where('approvalStatus', '==', 'pending')),
+      (snapshot) => {
+        let count = 0;
+        snapshot.forEach((docSnap) => {
+          if (docSnap.data().userId !== memberProfile.email) count += 1;
+        });
+        setPendingOthersCount(count);
+      }
+    );
+
+    return () => {
+      unsubClients();
+      unsubTypes();
+      unsubMembers();
+      unsubPending();
+    };
+  }, [memberProfile.email]);
 
   // Sidebar items
-  const sidebarItems = [
+  const adminSidebarItems = [
     { label: 'Exhibits Roster', tab: 'admin' as const, icon: <LayoutDashboard className="h-4 w-4" /> },
     { label: 'Inquiries', tab: 'inquiries' as const, icon: <Inbox className="h-4 w-4" /> },
     { label: 'Media Lab & Uploads', tab: 'upload' as const, icon: <FolderPlus className="h-4 w-4" /> },
     { label: 'Access & Security', tab: 'security' as const, icon: <Lock className="h-4 w-4" /> }
   ];
+  const worklogSidebarItems = [
+    { label: 'Timer', tab: 'timer' as const, icon: <Timer className="h-4 w-4" /> },
+    { label: 'Missed Work', tab: 'missed' as const, icon: <CalendarClock className="h-4 w-4" /> },
+    { label: 'My Entries', tab: 'entries' as const, icon: <ClipboardList className="h-4 w-4" /> },
+    { label: 'Team Status', tab: 'team-status' as const, icon: <Users className="h-4 w-4" /> },
+    { label: 'Approvals', tab: 'approvals' as const, icon: <ClipboardCheck className="h-4 w-4" /> },
+    { label: 'Reports', tab: 'reports' as const, icon: <BarChart3 className="h-4 w-4" /> }
+  ];
+  const adminWorklogSidebarItems = [
+    { label: 'Team', tab: 'team' as const, icon: <UserCog className="h-4 w-4" /> },
+    { label: 'Categories', tab: 'categories' as const, icon: <Briefcase className="h-4 w-4" /> }
+  ];
+  const sidebarItems = isWorklogAdmin
+    ? [...adminSidebarItems, ...worklogSidebarItems, ...adminWorklogSidebarItems]
+    : worklogSidebarItems;
 
   // List Management
   const [searchQuery, setSearchQuery] = useState('');
@@ -1063,7 +1168,7 @@ export default function AdminDashboardView({
         <aside className="lg:col-span-1 border-b lg:border-b-0 lg:border-r border-white/10 pb-6 lg:pb-0 lg:pr-8">
           <div className="mb-8 flex items-center space-x-2 border-b border-white/10 pb-4">
             <div className="h-2 w-2 rounded-full bg-neutral-400 animate-pulse" />
-            <span className="font-mono text-[9px] tracking-[0.25em] text-[#737373] uppercase">MACH10 SECURITY PANEL</span>
+            <span className="font-mono text-[9px] tracking-[0.25em] text-[#737373] uppercase">{isWorklogAdmin ? 'MACH10 SECURITY PANEL' : 'MACH10 WORKLOG'}</span>
           </div>
 
           <div className="space-y-2">
@@ -1093,6 +1198,11 @@ export default function AdminDashboardView({
                 {item.tab === 'inquiries' && unreadInquiryIds.length > 0 && (
                   <span className="ml-auto rounded-full bg-[#F9A136] px-2 py-0.5 text-[9px] font-bold text-black">
                     {unreadInquiryIds.length}
+                  </span>
+                )}
+                {item.tab === 'approvals' && pendingOthersCount > 0 && (
+                  <span className="ml-auto rounded-full bg-[#F9A136] px-2 py-0.5 text-[9px] font-bold text-black">
+                    {pendingOthersCount}
                   </span>
                 )}
               </button>
@@ -1693,6 +1803,38 @@ export default function AdminDashboardView({
 
               </form>
             </section>
+          ) : localTab === 'timer' ? (
+            <TimerView
+              profile={memberProfile}
+              clients={clients}
+              workTypes={workTypes}
+              onNotice={setSaveConfirmation}
+            />
+          ) : localTab === 'missed' ? (
+            <ManualEntryForm
+              profile={memberProfile}
+              clients={clients}
+              workTypes={workTypes}
+              onNotice={setSaveConfirmation}
+            />
+          ) : localTab === 'entries' ? (
+            <MyEntries profile={memberProfile} />
+          ) : localTab === 'team-status' ? (
+            <TeamStatus members={teamMembers} />
+          ) : localTab === 'approvals' ? (
+            <ApprovalsList profile={memberProfile} onNotice={setSaveConfirmation} />
+          ) : localTab === 'reports' ? (
+            <Reports
+              profile={memberProfile}
+              members={teamMembers}
+              clients={clients}
+              workTypes={workTypes}
+              isAdminRole={isWorklogAdmin}
+            />
+          ) : localTab === 'team' ? (
+            <TeamAdmin members={teamMembers} profile={memberProfile} onNotice={setSaveConfirmation} />
+          ) : localTab === 'categories' ? (
+            <CategoriesAdmin clients={clients} workTypes={workTypes} onNotice={setSaveConfirmation} />
           ) : localTab === 'admin' ? (
             
             // ROSTER OVERVIEW SECTION

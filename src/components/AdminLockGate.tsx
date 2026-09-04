@@ -40,7 +40,7 @@ export default function AdminLockGate({ onAuthenticate, onClose }: AdminLockGate
             Studio Keyhole Access
           </h1>
           <p className="font-mono text-[9px] text-[#737373] tracking-[0.15em] uppercase">
-            RESTRICTED CREATIVE SPACE &bull; AUTH REQUIRED
+            TEAM &amp; ADMIN ACCESS &bull; AUTH REQUIRED
           </p>
         </div>
 

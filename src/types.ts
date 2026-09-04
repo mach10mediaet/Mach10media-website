@@ -54,3 +54,61 @@ export interface Project {
 }
 
 export type ActiveView = 'home' | 'work' | 'services' | 'project' | 'about' | 'contact' | 'admin' | 'upload';
+
+// ── Work-Log (time tracking) ──
+
+export type MemberRole = 'admin' | 'employee';
+
+export interface MemberProfile {
+  email: string; // lowercased Google email, == team_members doc id
+  fullName: string;
+  role: MemberRole;
+}
+
+export interface TeamMember {
+  id: string; // lowercased email
+  fullName: string;
+  role: MemberRole;
+  isActive: boolean;
+  createdAt?: any;
+}
+
+export interface WorkCategory {
+  id: string;
+  name: string;
+  isActive: boolean;
+  createdAt?: any;
+}
+
+export type TimeEntryStatus = 'running' | 'paused' | 'completed';
+export type EntryMethod = 'timer' | 'manual';
+export type ApprovalStatus = 'not_required' | 'pending' | 'approved' | 'rejected';
+
+export interface TimeEntry {
+  id: string;
+  userId: string; // lowercased email == team_members doc id
+  userName: string;
+  clientId: string; // '' while unset
+  clientName: string;
+  workTypeId: string;
+  workTypeName: string;
+  notes: string;
+  startTime: number; // epoch ms, client clock
+  endTime: number | null;
+  entryDate: string; // 'YYYY-MM-DD' in Africa/Addis_Ababa
+  status: TimeEntryStatus;
+  entryMethod: EntryMethod;
+  durationMinutes: number | null;
+  isLateSubmission: boolean;
+  approvalStatus: ApprovalStatus;
+  approvedBy: string | null;
+  approvedAt?: any;
+  createdAt?: any;
+  updatedAt?: any;
+}
+
+export interface TimeEntryPause {
+  id: string;
+  pausedAt: number;
+  resumedAt: number | null;
+}

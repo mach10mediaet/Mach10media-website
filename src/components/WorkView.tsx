@@ -16,6 +16,7 @@ export default function WorkView({ projects, onNavigateToProject }: WorkViewProp
     'All',
     'Photography',
     'Branding',
+    'Commercial',
     'Social Media',
     'Food Content',
     'Fashion'

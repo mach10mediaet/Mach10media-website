@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowDown, ArrowUpRight, Play, Quote, ChevronLeft, ChevronRight, Activity, Volume2, Sparkles } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, Play, Quote, ChevronLeft, ChevronRight, Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Project, ActiveView } from '../types';
 import heroVideo from '../assets/Hero.mp4';
@@ -18,22 +18,18 @@ interface HomeViewProps {
 export default function HomeView({ projects, onNavigateToProject, onNavigate }: HomeViewProps) {
   const [activeServiceHover, setActiveServiceHover] = useState<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
 
   const handleScrollToContent = () => {
     const nextSection = document.getElementById('logos-marquee-section');
     nextSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Playback control
-  const togglePlay = () => {
+  // Reel audio control — autoplays muted per browser policy; unmuting needs a user gesture
+  const toggleMute = () => {
     if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play().catch(() => {});
-      }
-      setIsPlaying(!isPlaying);
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
     }
   };
 
@@ -208,12 +204,12 @@ Our work is built around clean execution, intentional design, and content that f
             {/* Scroll indicators */}
             <div className="flex flex-wrap items-center gap-4">
               <button
-                onClick={togglePlay}
+                onClick={toggleMute}
                 className="flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-6 py-3.5 font-mono text-xs tracking-widest text-[#f2f2f2] uppercase transition-all duration-500 hover:scale-105 hover:border-[#F9A136]/40 hover:bg-[#F9A136]/10 hover:text-[#F9A136]"
                 id="hero-audio-mute-button"
               >
-                <Activity className={`h-3 w-3 ${isPlaying ? 'text-[#F9A136] animate-pulse' : 'opacity-40'}`} />
-                <span>{isPlaying ? 'Mute Reel' : 'Play Reel'}</span>
+                <Volume2 className={`h-3 w-3 ${isMuted ? 'opacity-40' : 'text-[#F9A136] animate-pulse'}`} />
+                <span>{isMuted ? 'Unmute Reel' : 'Mute Reel'}</span>
               </button>
 
               <button

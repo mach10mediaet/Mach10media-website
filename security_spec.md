@@ -5,7 +5,7 @@ This document outlines the strict zero-trust data invariants, rogue payloads, an
 ## 1. Data Invariants
 
 1. **Read-Only Public Gallery**: Portfolio projects must be universally readable (`allow get, list: if true;`) so that site visitors can dynamically view exhibits without needing authentication.
-2. **Restricted Admin Writes**: Creating, updating, or deleting exhibits is strictly restricted to the authorized admin email address (`Besofekad@gmail.com`) with a verified Google account (`request.auth.token.email_verified == true`).
+2. **Restricted Admin Writes**: Creating, updating, or deleting exhibits is strictly restricted to the verified admin allowlist (`besofekad@gmail.com`, `habte919@gmail.com`) with a verified Google account (`request.auth.token.email_verified == true`).
 3. **Identifier Sanity**: All document identifiers must meet standard constraints (alphanumeric, hyphens) and never exceed 128 characters to prevent pollution.
 4. **Data Size Integrity**: Text descriptions, titles, and image URLs are strictly bounded to prevent Denial of Wallet payload exhaustion.
 5. **No Orphaned Schema Keys**: Document keys on creation must be exactly equal to the required project schematic to prevent shadow keys.
@@ -35,7 +35,7 @@ Anonymous write attempt to create a custom project.
 ```
 
 ### Payload 2: Spoofed Creator (Wrong Email)
-Attempt to write with an authenticated user whose email is not `Besofekad@gmail.com`.
+Attempt to write with an authenticated user whose email is not on the admin allowlist.
 ```json
 // auth.token.email = "hacker@evil.com", email_verified = true
 {
@@ -58,7 +58,7 @@ Attempt to write with an authenticated user whose email is not `Besofekad@gmail.
 ### Payload 3: Unverified Email Admin Spoof
 Attempt to write pretending to be the admin but with `email_verified == false` on the oauth token.
 ```json
-// auth.token.email = "Besofekad@gmail.com", email_verified = false
+// auth.token.email = "besofekad@gmail.com", email_verified = false
 {
   "id": "proj-exploit-3",
   "title": "Verif Bypass",

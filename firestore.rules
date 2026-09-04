@@ -13,10 +13,12 @@ service cloud.firestore {
     }
 
     // Only verified Google accounts in this allowlist may manage portfolio data.
+    // App Check: once App Check is enabled with enforcement in the Firebase console and
+    // VITE_APP_CHECK_SITE_KEY is configured (see .env.example), append `&& request.app != null`
+    // to the public write conditions (e.g. inquiries). Adding it earlier rejects all web traffic.
     function isAdmin() {
       return isSignedIn() && 
-             (request.auth.token.email == "Besofekad@gmail.com" ||
-              request.auth.token.email == "besofekad@gmail.com" ||
+             (request.auth.token.email == "besofekad@gmail.com" ||
               request.auth.token.email == "habte919@gmail.com") && 
              request.auth.token.email_verified == true;
     }
@@ -142,6 +144,157 @@ service cloud.firestore {
                     incoming().createdAt == request.time &&
                     incoming().updatedAt == request.time;
       allow get, list, update, delete: if isAdmin();
+    }
+
+    // ── Work-Log feature: team members, categories, time entries ──
+
+    // Team member docs are keyed by the member's lowercased Google email.
+    function isEmailId(id) {
+      return id is string && id.size() > 5 && id.size() <= 128 &&
+             id.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    // Caller must be a pre-registered, active team member (doc id == their auth email).
+    function isActiveMember() {
+      return isSignedIn() &&
+             exists(/databases/$(database)/documents/team_members/$(request.auth.token.email)) &&
+             get(/databases/$(database)/documents/team_members/$(request.auth.token.email)).data.is_active == true;
+    }
+
+    function isValidMember(data) {
+      return data.keys().hasOnly(['fullName', 'role', 'isActive', 'createdAt']) &&
+             data.keys().hasAll(['fullName', 'role', 'isActive', 'createdAt']) &&
+             data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 80 &&
+             data.role in ['admin', 'employee'] &&
+             data.isActive is bool;
+    }
+
+    function isValidWorkCategory(data) {
+      return data.keys().hasOnly(['name', 'isActive', 'createdAt']) &&
+             data.keys().hasAll(['name', 'isActive', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 80 &&
+             data.isActive is bool;
+    }
+
+    function isValidTimeEntry(data) {
+      return data.keys().hasOnly(['userId', 'userName', 'clientId', 'clientName', 'workTypeId', 'workTypeName', 'notes', 'startTime', 'endTime', 'entryDate', 'status', 'entryMethod', 'durationMinutes', 'isLateSubmission', 'approvalStatus', 'approvedBy', 'approvedAt', 'createdAt', 'updatedAt']) &&
+             data.keys().hasAll(['userId', 'userName', 'clientId', 'clientName', 'workTypeId', 'workTypeName', 'notes', 'startTime', 'endTime', 'entryDate', 'status', 'entryMethod', 'durationMinutes', 'isLateSubmission', 'approvalStatus', 'approvedBy', 'approvedAt', 'createdAt', 'updatedAt']) &&
+             data.userId is string && data.userId.size() <= 128 &&
+             data.userName is string && data.userName.size() <= 80 &&
+             data.clientId is string && data.clientId.size() <= 128 &&
+             data.clientName is string && data.clientName.size() <= 80 &&
+             data.workTypeId is string && data.workTypeId.size() <= 128 &&
+             data.workTypeName is string && data.workTypeName.size() <= 80 &&
+             data.notes is string && data.notes.size() <= 500 &&
+             data.entryDate is string && data.entryDate.matches('^\\d{4}-\\d{2}-\\d{2}$') &&
+             data.status in ['running', 'paused', 'completed'] &&
+             data.entryMethod in ['timer', 'manual'] &&
+             data.approvalStatus in ['not_required', 'pending', 'approved', 'rejected'] &&
+             data.isLateSubmission is bool &&
+             data.startTime is number && data.startTime > 0 &&
+             (data.endTime == null || (data.endTime is number && data.endTime >= data.startTime)) &&
+             (data.durationMinutes == null || (data.durationMinutes is number && data.durationMinutes >= 0 && data.durationMinutes <= 1440)) &&
+             (data.approvedBy == null || (data.approvedBy is string && data.approvedBy.size() <= 128));
+    }
+
+    // Members read own entries, everyone's live entries (team status), and pending
+    // late entries (approvals). Admin reads everything.
+    function canReadTimeEntry() {
+      return isAdmin() ||
+             (isActiveMember() &&
+              (resource.data.userId == request.auth.token.email ||
+               resource.data.status != 'completed' ||
+               resource.data.approvalStatus == 'pending'));
+    }
+
+    match /team_members/{memberEmail} {
+      allow get, list: if isAdmin() ||
+                        (isSignedIn() && memberEmail == request.auth.token.email) ||
+                        isActiveMember();
+      allow create: if isAdmin() &&
+                    isEmailId(memberEmail) &&
+                    isValidMember(incoming()) &&
+                    incoming().createdAt == request.time;
+      allow update: if isAdmin() &&
+                    isEmailId(memberEmail) &&
+                    incoming().createdAt == existing().createdAt &&
+                    isValidMember(incoming());
+      allow delete: if isAdmin() && isEmailId(memberEmail);
+    }
+
+    match /clients/{categoryId} {
+      allow get, list: if isAdmin() || isActiveMember();
+      allow create: if isAdmin() &&
+                    isValidId(categoryId) &&
+                    isValidWorkCategory(incoming()) &&
+                    incoming().createdAt == request.time;
+      allow update: if isAdmin() &&
+                    isValidId(categoryId) &&
+                    incoming().createdAt == existing().createdAt &&
+                    isValidWorkCategory(incoming());
+      allow delete: if isAdmin() && isValidId(categoryId);
+    }
+
+    match /work_types/{categoryId} {
+      allow get, list: if isAdmin() || isActiveMember();
+      allow create: if isAdmin() &&
+                    isValidId(categoryId) &&
+                    isValidWorkCategory(incoming()) &&
+                    incoming().createdAt == request.time;
+      allow update: if isAdmin() &&
+                    isValidId(categoryId) &&
+                    incoming().createdAt == existing().createdAt &&
+                    isValidWorkCategory(incoming());
+      allow delete: if isAdmin() && isValidId(categoryId);
+    }
+
+    match /time_entries/{entryId} {
+      allow get, list: if canReadTimeEntry();
+
+      allow create: if (isAdmin() || isActiveMember()) &&
+                    incoming().userId == request.auth.token.email &&
+                    incoming().createdAt == request.time &&
+                    incoming().updatedAt == request.time &&
+                    incoming().startTime <= request.time.toMillis() + 300000 &&
+                    ((incoming().entryMethod == 'timer' && incoming().approvalStatus == 'not_required' && incoming().isLateSubmission == false) ||
+                     (incoming().entryMethod == 'manual' && incoming().approvalStatus in ['not_required', 'pending'])) &&
+                    isValidTimeEntry(incoming());
+
+      allow update: if isAdmin() ||
+                    (isActiveMember() &&
+                     isValidTimeEntry(incoming()) &&
+                     incoming().updatedAt == request.time &&
+                     incoming().createdAt == existing().createdAt &&
+                     incoming().userId == existing().userId &&
+                     ((existing().userId == request.auth.token.email &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clientId', 'clientName', 'workTypeId', 'workTypeName', 'notes', 'status', 'endTime', 'durationMinutes', 'updatedAt']))
+                      ||
+                      (existing().userId != request.auth.token.email &&
+                       existing().approvalStatus == 'pending' &&
+                       incoming().approvalStatus in ['approved', 'rejected'] &&
+                       incoming().approvedBy == request.auth.token.email &&
+                       incoming().approvedAt == request.time &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['approvalStatus', 'approvedBy', 'approvedAt', 'updatedAt']))));
+
+      allow delete: if isAdmin();
+    }
+
+    match /time_entries/{entryId}/pauses/{pauseId} {
+      allow get, list: if isAdmin() || isActiveMember();
+      allow create: if (isAdmin() || isActiveMember()) &&
+                    get(/databases/$(database)/documents/time_entries/$(entryId)).data.userId == request.auth.token.email &&
+                    incoming().keys().hasOnly(['pausedAt', 'resumedAt']) &&
+                    incoming().pausedAt is number &&
+                    incoming().pausedAt > 0 &&
+                    incoming().pausedAt <= request.time.toMillis() + 300000 &&
+                    incoming().resumedAt == null;
+      allow update: if (isAdmin() || isActiveMember()) &&
+                    get(/databases/$(database)/documents/time_entries/$(entryId)).data.userId == request.auth.token.email &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['resumedAt']) &&
+                    incoming().resumedAt is number &&
+                    incoming().resumedAt >= resource.data.pausedAt &&
+                    incoming().resumedAt <= request.time.toMillis() + 300000;
+      allow delete: if isAdmin();
     }
   }
 }

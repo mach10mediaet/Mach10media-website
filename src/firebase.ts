@@ -1,10 +1,22 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import firebaseConfig from '../firebase-applet-config.json';
 
 // Initialize the Firebase instances
 const app = initializeApp(firebaseConfig);
+
+// App Check only activates when VITE_APP_CHECK_SITE_KEY is set and the matching
+// reCAPTCHA v3 key is registered under App Check in the Firebase console. Until
+// then the app sends no app-check token and Firestore rules must not require one.
+const appCheckSiteKey = import.meta.env.VITE_APP_CHECK_SITE_KEY as string | undefined;
+if (appCheckSiteKey) {
+  initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(appCheckSiteKey),
+    isTokenAutoRefreshEnabled: true,
+  });
+}
 export const firebaseProjectId = firebaseConfig.projectId;
 export const firestoreDatabaseLabel = ((firebaseConfig as any).firestoreDatabaseId as string | undefined) || '(default)';
 export const firebaseStorageBucket = firebaseConfig.storageBucket;

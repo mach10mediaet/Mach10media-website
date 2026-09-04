@@ -143,7 +143,7 @@ export default function ContactView() {
     'Branding & Design',
     'Commercial Film',
     'Fashion Photography',
-    'Social  Strategy',
+    'Social Strategy',
     'Full Campaign Orchestration'
   ];
 
@@ -155,7 +155,7 @@ export default function ContactView() {
     {
       city: 'Addis Ababa',
       desc: 'Headquarters',
-      address: 'Kidus Complex, Kazanchis, Addis Ababa, Ehtiopia,  ',
+      address: 'Kidus Complex, Kazanchis, Addis Ababa, Ethiopia',
       email: 'Mach10media.et@gmail.com',
       phone: '+251-920969486, +251-920523976'
     }

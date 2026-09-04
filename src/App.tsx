@@ -16,13 +16,38 @@ const AdminDashboardView = lazy(() => import('./components/AdminDashboardView'))
 const AdminLockGate = lazy(() => import('./components/AdminLockGate'));
 
 import { INITIAL_PROJECTS } from './data/mockProjects';
-import { Project, ActiveView, AppDiagnosticEvent } from './types';
+import { Project, ActiveView, AppDiagnosticEvent, MemberProfile, MemberRole } from './types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Instagram, ShieldAlert } from 'lucide-react';
 
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, doc, getDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { auth, db, signInWithGoogle } from './firebase';
+
+// Admins are the hardcoded allowlist; employees must have an active team_members
+// doc keyed by their lowercased email. Admin allowlist always wins for admins.
+async function resolveMemberProfile(user: User): Promise<MemberProfile | null> {
+  const email = user.email?.toLowerCase() || '';
+  if (!email) return null;
+
+  let fullName = email.split('@')[0];
+  let role: MemberRole | null = ADMIN_EMAILS.has(email) ? 'admin' : null;
+
+  try {
+    const memberSnap = await getDoc(doc(db, 'team_members', email));
+    if (memberSnap.exists()) {
+      const data = memberSnap.data();
+      if (typeof data.fullName === 'string' && data.fullName) fullName = data.fullName;
+      if (!role && data.isActive && (data.role === 'admin' || data.role === 'employee')) {
+        role = data.role;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to resolve team membership:', error);
+  }
+
+  return role ? { email, fullName, role } : null;
+}
 
 export default function App() {
   // Navigation states
@@ -44,6 +69,7 @@ export default function App() {
   });
 
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
+  const [memberProfile, setMemberProfile] = useState<MemberProfile | null>(null);
 
   const setAdminSlug = (newSlug: string) => {
     setAdminSlugState(newSlug);
@@ -89,22 +115,51 @@ export default function App() {
         level: 'info',
         message: user ? `Authenticated as ${user.email || user.uid}.` : 'Signed out of Firebase auth.'
       });
+
+      if (!user) {
+        setMemberProfile(null);
+        return;
+      }
+
+      resolveMemberProfile(user)
+        .then((profile) => {
+          setMemberProfile(profile);
+          if (!profile && user.email) {
+            pushDiagnosticEvent({
+              source: 'auth',
+              level: 'warning',
+              message: `Signed-in account ${user.email} has no active studio membership.`
+            });
+          }
+        })
+        .catch(() => setMemberProfile(null));
     });
     return () => unsubscribe();
   }, []);
 
   const handleAuthenticateAdmin = async () => {
     const result = await signInWithGoogle();
-    const email = result.user?.email?.toLowerCase();
-    if (!email || !ADMIN_EMAILS.has(email)) {
+    const user = result.user;
+    const email = user?.email?.toLowerCase();
+
+    if (!user || !email) {
+      await signOut(auth);
+      throw new Error('Google sign-in did not return an email address.');
+    }
+
+    const profile = await resolveMemberProfile(user);
+    if (!profile) {
       await signOut(auth);
       pushDiagnosticEvent({
         source: 'auth',
         level: 'warning',
-        message: `Unauthorized admin sign-in attempt from ${result.user?.email || 'unknown account'}.`
+        message: `Unauthorized sign-in attempt from ${user.email || 'unknown account'}.`
       });
-      throw new Error('This Google account is not authorized for admin access.');
+      throw new Error('This Google account is not registered for studio access.');
     }
+
+    // Resolved eagerly so the dashboard mounts without waiting for the auth listener.
+    setMemberProfile(profile);
   };
 
   const handleLogOut = () => {
@@ -116,6 +171,7 @@ export default function App() {
         message: error.message || 'Failed to sign out admin.'
       });
     });
+    setMemberProfile(null);
     setActiveView('home');
     window.location.hash = '';
   };
@@ -293,11 +349,11 @@ export default function App() {
       case 'contact':
         return <ContactView />;
       case 'admin':
-        if (!firebaseUser || !ADMIN_EMAILS.has(firebaseUser.email?.toLowerCase() || '')) {
+        if (!firebaseUser || !memberProfile) {
           return (
-            <AdminLockGate 
-              onAuthenticate={handleAuthenticateAdmin} 
-              onClose={() => setActiveView('home')} 
+            <AdminLockGate
+              onAuthenticate={handleAuthenticateAdmin}
+              onClose={() => setActiveView('home')}
             />
           );
         }
@@ -312,14 +368,15 @@ export default function App() {
             onLogOut={handleLogOut}
             diagnosticEvents={diagnosticEvents}
             projectsError={projectsError}
+            memberProfile={memberProfile}
           />
         );
       case 'upload':
-        if (!firebaseUser || !ADMIN_EMAILS.has(firebaseUser.email?.toLowerCase() || '')) {
+        if (!firebaseUser || !memberProfile) {
           return (
-            <AdminLockGate 
-              onAuthenticate={handleAuthenticateAdmin} 
-              onClose={() => setActiveView('home')} 
+            <AdminLockGate
+              onAuthenticate={handleAuthenticateAdmin}
+              onClose={() => setActiveView('home')}
             />
           );
         }
@@ -334,6 +391,7 @@ export default function App() {
             onLogOut={handleLogOut}
             diagnosticEvents={diagnosticEvents}
             projectsError={projectsError}
+            memberProfile={memberProfile}
           />
         );
       default:

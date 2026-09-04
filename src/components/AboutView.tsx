@@ -1,8 +1,8 @@
 import React from 'react';
 import { Sparkles, Award, Heart, Shield } from 'lucide-react';
-import besuImage from '../assets/besufekad-bekele.jpeg';
+import besuImage from '../assets/besufekad-bekele.webp';
 import yosephImage from '../assets/yoseph-habte.jpeg';
-import dagmawiImage from '../assets/dagmawi-mekonen.jpg';
+import dagmawiImage from '../assets/dagmawi-mekonen.webp';
 import ideaImage from '../assets/idea.jpeg';
 
 export default function AboutView() {

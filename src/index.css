@@ -34,6 +34,25 @@
   animation: float 8s ease-in-out infinite;
 }
 
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.7s ease-out both;
+}
+
+@keyframes scale-x {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
 /* Prevent typography overlaps on short viewports (tablet landscape, small laptops & mobile) */
 #hero-section {
   padding-top: 150px !important; /* Always secure space for the fixed header */
