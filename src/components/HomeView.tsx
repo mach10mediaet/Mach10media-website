@@ -207,7 +207,7 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
       {/* SECTION 1 — CINEMATIC HERO */}
       <section 
         id="hero-section" 
-        className="relative flex min-h-screen lg:min-h-0 lg:h-screen w-full flex-col justify-center overflow-hidden px-6 pt-24 pb-16 md:px-12 md:pt-28 md:pb-24 lg:pt-0"
+        className="relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-6 pt-24 pb-16 md:px-12 md:pt-28 md:pb-24"
       >
         {/* Fullscreen Video Background */}
         <div className="absolute inset-0 z-0 bg-[#080808]">
