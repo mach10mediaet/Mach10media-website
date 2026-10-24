@@ -1,8 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowDown, ArrowUpRight, Play, Quote, ChevronLeft, ChevronRight, Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Project, ActiveView } from '../types';
-import heroVideo from '../assets/Hero.mp4';
+import { Project, ActiveView, ClientLogo } from '../types';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useSiteSetting } from '../hooks/useSiteSetting';
+
+// Streamed from /public with CDN caching instead of shipping inside the bundle
+const heroVideo = '/hero-reel.mp4';
 import brandIdentityImage from '../assets/brand-identity-and-design-system.jpeg';
 import commercialPhotographyImage from '../assets/commerical-photography.jpeg';
 import foodPhotographyImage from '../assets/food-photography.jpg';
@@ -35,7 +40,14 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
 
   // Testimonials state
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
-  const testimonials = [
+  interface DisplayTestimonial {
+    quote: string;
+    author: string;
+    role: string;
+    company: string;
+  }
+
+  const FALLBACK_TESTIMONIALS: DisplayTestimonial[] = [
     {
       quote: "Mach10 Media transformed our vision into a strong brand identity. From the logo to the packaging, every detail exceeded our expectations.",
       author: "Natnael Mebratu",
@@ -56,6 +68,33 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
     }
   ];
 
+  // Testimonials are admin-managed (Site Content tab); the fallback keeps the
+  // section alive before any live entries exist.
+  const [liveTestimonials, setLiveTestimonials] = useState<DisplayTestimonial[] | null>(null);
+  useEffect(() => {
+    const unsubscribe = onSnapshot(query(collection(db, 'testimonials'), where('isActive', '==', true)), (snapshot) => {
+      const loaded: DisplayTestimonial[] = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        loaded.push({
+          quote: typeof data.quote === 'string' ? data.quote : '',
+          author: typeof data.author === 'string' ? data.author : '',
+          role: '',
+          company: typeof data.company === 'string' ? data.company : ''
+        });
+      });
+      setLiveTestimonials(loaded.length > 0 ? loaded : null);
+    });
+    return () => unsubscribe();
+  }, []);
+  const testimonials = liveTestimonials || FALLBACK_TESTIMONIALS;
+
+  // Keep the active index valid when the live list replaces the fallback
+  useEffect(() => {
+    setCurrentTestimonial((prev) => (prev >= testimonials.length ? 0 : prev));
+  }, [testimonials.length]);
+  const activeTestimonial = testimonials[currentTestimonial] || testimonials[0];
+
   const handlePrevTestimonial = () => {
     setCurrentTestimonial((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1));
   };
@@ -63,6 +102,17 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
   const handleNextTestimonial = () => {
     setCurrentTestimonial((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1));
   };
+
+  // Gentle auto-rotation, paused while the visitor is reading (hover)
+  const [isTestimonialsHovered, setIsTestimonialsHovered] = useState(false);
+  const instagramEmbedUrl = useSiteSetting('instagram_embed_url');
+  useEffect(() => {
+    if (isTestimonialsHovered || testimonials.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    }, 7000);
+    return () => clearInterval(timer);
+  }, [isTestimonialsHovered, testimonials.length]);
 
   // Curated Services listing
   const services = [
@@ -108,11 +158,30 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
     }
   ];
 
-  // Infinite sliding logos list
-  const clientLogos = [
-    'OLIVE & BREAD', 'MUGO DESIGN', 'BILOS', 'KOBA', 
-    'CRAVINGS', 'ILLY', 'WEGUS ', 'ROMINA'
-  ];
+  // Infinite sliding logos — admin-managed via client_logos, fallback keeps the marquee alive
+  const FALLBACK_CLIENT_LOGOS = ['OLIVE & BREAD', 'MUGO DESIGN', 'BILOS', 'KOBA', 'CRAVINGS', 'ILLY', 'WEGUS', 'ROMINA'];
+  const [liveClientLogos, setLiveClientLogos] = useState<ClientLogo[] | null>(null);
+  useEffect(() => {
+    const unsubscribe = onSnapshot(query(collection(db, 'client_logos'), where('isActive', '==', true)), (snapshot) => {
+      const loaded: ClientLogo[] = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        loaded.push({
+          id: docSnap.id,
+          name: typeof data.name === 'string' ? data.name : '',
+          logoUrl: typeof data.logoUrl === 'string' ? data.logoUrl : '',
+          order: typeof data.order === 'number' ? data.order : 0,
+          isActive: true
+        });
+      });
+      loaded.sort((first, second) => first.order - second.order);
+      setLiveClientLogos(loaded.length > 0 ? loaded : null);
+    });
+    return () => unsubscribe();
+  }, []);
+  const clientLogos: ClientLogo[] = liveClientLogos || FALLBACK_CLIENT_LOGOS.map((name, index) => ({
+    id: `fallback-${index}`, name, logoUrl: '', order: index, isActive: true
+  }));
 
   const getProjectTimestamp = (value: any) => {
     if (typeof value?.toMillis === 'function') return value.toMillis();
@@ -164,7 +233,7 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#F9A136] opacity-75"></span>
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-[#F9A136]"></span>
               </span>
-              <span>SUMMER ARCHIVES COLLECTION</span>
+              <span>SELECTED ARCHIVES COLLECTION</span>
             </div>
             
             <h1 className="font-sans text-3xl xs:text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-extralight leading-[1.02] tracking-tighter text-[#f2f2f2] uppercase">
@@ -236,22 +305,30 @@ Our work is built around clean execution, intentional design, and content that f
         <div className="flex w-full overflow-hidden select-none">
           {/* Logo chain repeated 3 times to guarantee smooth infinite looping layout */}
           <div className="flex shrink-0 animate-[marquee_25s_linear_infinite] justify-around min-w-full items-center gap-16 pr-16">
-            {clientLogos.map((logo, index) => (
-              <span 
-                key={index} 
-                className="font-sans text-xs font-black tracking-[0.3em] text-neutral-600 transition-colors duration-300 hover:text-[#F9A136] cursor-default"
+            {clientLogos.map((logo) => (
+              <span
+                key={logo.id}
+                className="font-sans text-xs font-black tracking-[0.3em] text-neutral-600 transition-colors duration-300 hover:text-[#F9A136] cursor-default whitespace-nowrap"
               >
-                {logo}
+                {logo.logoUrl ? (
+                  <img src={logo.logoUrl} alt={logo.name} className="h-6 w-auto opacity-50 hover:opacity-100 transition-opacity" referrerPolicy="no-referrer" loading="lazy" />
+                ) : (
+                  logo.name
+                )}
               </span>
             ))}
           </div>
           <div className="flex shrink-0 animate-[marquee_25s_linear_infinite] justify-around min-w-full items-center gap-16 pr-16" aria-hidden="true">
-            {clientLogos.map((logo, index) => (
-              <span 
-                key={index} 
-                className="font-sans text-xs font-black tracking-[0.3em] text-neutral-600 transition-colors duration-300 hover:text-[#F9A136] cursor-default"
+            {clientLogos.map((logo) => (
+              <span
+                key={`dup-${logo.id}`}
+                className="font-sans text-xs font-black tracking-[0.3em] text-neutral-600 transition-colors duration-300 hover:text-[#F9A136] cursor-default whitespace-nowrap"
               >
-                {logo}
+                {logo.logoUrl ? (
+                  <img src={logo.logoUrl} alt="" className="h-6 w-auto opacity-50 transition-opacity" referrerPolicy="no-referrer" loading="lazy" />
+                ) : (
+                  logo.name
+                )}
               </span>
             ))}
           </div>
@@ -440,8 +517,10 @@ Our work is built around clean execution, intentional design, and content that f
       </section>
 
       {/* SECTION 5 — TESTIMONIALS (ANIMATED CHANGER) */}
-      <section 
-        id="testimonials-slider-section" 
+      <section
+        id="testimonials-slider-section"
+        onMouseEnter={() => setIsTestimonialsHovered(true)}
+        onMouseLeave={() => setIsTestimonialsHovered(false)}
         className="border-t border-white/5 bg-[#090909]/40 py-24 md:py-32 mt-12 md:mt-16"
       >
         <div className="mx-auto max-w-5xl px-6 text-center md:px-12">
@@ -458,16 +537,16 @@ Our work is built around clean execution, intentional design, and content that f
               >
                 <blockquote>
                   <p className="font-sans text-xl font-light italic leading-relaxed text-[#f2f2f2] sm:text-2xl md:text-3xl max-w-4xl mx-auto tracking-tight">
-                    "{testimonials[currentTestimonial].quote}"
+                    "{activeTestimonial.quote}"
                   </p>
                 </blockquote>
-                
+
                 <div className="mt-8">
                   <p className="font-sans text-sm font-medium text-white tracking-wider uppercase">
-                    {testimonials[currentTestimonial].author}
+                    {activeTestimonial.author}
                   </p>
                   <p className="font-mono text-[10px] tracking-[0.25em] text-[#8c8c8c] uppercase mt-1">
-                    {testimonials[currentTestimonial].role} &bull; {testimonials[currentTestimonial].company}
+                    {activeTestimonial.role ? `${activeTestimonial.role} • ` : ''}{activeTestimonial.company}
                   </p>
                 </div>
               </motion.div>
@@ -484,7 +563,7 @@ Our work is built around clean execution, intentional design, and content that f
               <ChevronLeft className="h-4 w-4" />
             </button>
             <span className="font-mono text-xs text-[#525252] tracking-widest">
-              0{currentTestimonial + 1} &mdash; 0{testimonials.length}
+              {String(currentTestimonial + 1).padStart(2, '0')} &mdash; {String(testimonials.length).padStart(2, '0')}
             </span>
             <button
               onClick={handleNextTestimonial}
@@ -497,9 +576,44 @@ Our work is built around clean execution, intentional design, and content that f
         </div>
       </section>
 
-      {/* SECTION 6 — CALL TO CONTACT ACTION */}
-      <section 
-        id="homepage-contact-cta" 
+      {/* SECTION 6 — INSTAGRAM PRESENCE */}
+      <section id="instagram-section" className="border-t border-white/5 bg-[#090909]/40 py-20 md:py-24">
+        <div className="mx-auto max-w-6xl px-6 md:px-12 text-center">
+          <p className="font-mono text-[11px] tracking-[0.3em] text-[#737373] uppercase mb-4">LATEST ON SOCIAL</p>
+          <h2 className="font-sans text-3xl font-extralight tracking-tight text-white uppercase">
+            The work, <span className="webkit-stroke font-black opacity-80">unfiltered</span>
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl font-sans text-sm font-light text-neutral-400 leading-relaxed">
+            Behind the scenes, fresh drops, and campaign moments — follow the studio on Instagram.
+          </p>
+
+          {instagramEmbedUrl ? (
+            <div className="mt-10 overflow-hidden rounded-lg border border-white/5 bg-[#0c0c0c]/40">
+              <iframe
+                src={instagramEmbedUrl}
+                title="Mach10 Media on Instagram"
+                loading="lazy"
+                className="h-[480px] w-full border-0"
+              />
+            </div>
+          ) : (
+            <a
+              href="https://www.instagram.com/mach10.et/"
+              target="_blank"
+              rel="noreferrer"
+              className="group mt-10 inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-8 py-4 font-mono text-xs tracking-widest text-white uppercase transition-all duration-500 hover:border-[#F9A136] hover:bg-[#F9A136] hover:text-black"
+              id="home-instagram-cta"
+            >
+              <span>@mach10.et on Instagram</span>
+              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </a>
+          )}
+        </div>
+      </section>
+
+      {/* SECTION 7 — CALL TO CONTACT ACTION */}
+      <section
+        id="homepage-contact-cta"
         className="relative flex min-h-[550px] items-center justify-center bg-transparent px-6 py-28 text-center"
       >
         <div className="absolute inset-0 bg-[#080808]/60 backdrop-blur-[2px] pointer-events-none" />

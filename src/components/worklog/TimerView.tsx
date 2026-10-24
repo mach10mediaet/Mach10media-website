@@ -85,6 +85,15 @@ export default function TimerView({ profile, clients, workTypes, onNotice }: Tim
   );
   const openPause = pauses.find((pause) => pause.resumedAt == null) || null;
 
+  // Idle-session guard: long-running sessions are usually forgotten timers.
+  const [idleDismissedUntil, setIdleDismissedUntil] = useState(0);
+  const IDLE_THRESHOLD_MS = 3 * 60 * 60 * 1000;
+  const isIdleWarning = Boolean(
+    activeEntry?.status === 'running' &&
+    workedMs > IDLE_THRESHOLD_MS &&
+    Date.now() > idleDismissedUntil
+  );
+
   const runWrite = async (action: () => Promise<void>, successMessage: string) => {
     setIsBusy(true);
     setError(null);
@@ -210,6 +219,31 @@ export default function TimerView({ profile, clients, workTypes, onNotice }: Tim
       {error && (
         <div className="rounded border border-red-500/20 bg-red-950/20 px-4 py-3 font-mono text-[10px] text-red-300">
           {error}
+        </div>
+      )}
+
+      {isIdleWarning && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#F9A136]/30 bg-[#F9A136]/10 px-5 py-4">
+          <p className="font-sans text-sm text-[#f7d6a0]">
+            This session has been running for over {formatDurationMinutes(Math.round(IDLE_THRESHOLD_MS / 60000))} — still working?
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIdleDismissedUntil(Date.now() + 60 * 60 * 1000)}
+              className="border border-[#F9A136]/40 px-4 py-2 font-mono text-[9px] uppercase tracking-wider text-[#F9A136] hover:bg-[#F9A136] hover:text-black transition-colors"
+              id="idle-keep-working-button"
+            >
+              Yes, keep counting
+            </button>
+            <button
+              onClick={handleStop}
+              disabled={isBusy}
+              className="border border-white/15 px-4 py-2 font-mono text-[9px] uppercase tracking-wider text-neutral-300 hover:text-white disabled:opacity-40"
+              id="idle-stop-now-button"
+            >
+              Stop it now
+            </button>
+          </div>
         </div>
       )}
 

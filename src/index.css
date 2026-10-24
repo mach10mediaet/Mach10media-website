@@ -100,8 +100,42 @@
     font-size: clamp(1.5rem, 5vw, 3.2rem) !important;
     line-height: 1.05 !important;
   }
-  
+
   #hero-section p {
     margin-top: 0.75rem !important;
   }
+}
+
+/* ── Rate Estimator shared globals (ported from Net-Work calculator) ── */
+
+/* Accessible high-contrast focus indicator */
+:where(a:any-link, button, input, select, textarea, [role="switch"]):focus-visible {
+  outline: 2px solid #F9A136;
+  outline-offset: 2px;
+}
+
+/* Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #080808;
+}
+::-webkit-scrollbar-thumb {
+  background: #222222;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #F9A136;
+}
+
+/* Remove number spin buttons (calculator quantity steppers) */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
 }

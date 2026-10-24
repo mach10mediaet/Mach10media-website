@@ -47,7 +47,9 @@ import {
   ClipboardCheck,
   BarChart3,
   UserCog,
-  Briefcase
+  Briefcase,
+  PenSquare,
+  Calculator
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import TimerView from './worklog/TimerView';
@@ -58,6 +60,8 @@ import ApprovalsList from './worklog/ApprovalsList';
 import Reports from './worklog/Reports';
 import TeamAdmin from './worklog/TeamAdmin';
 import CategoriesAdmin from './worklog/CategoriesAdmin';
+import SiteContentAdmin from './admin/SiteContentAdmin';
+import RatesAdmin from '../calculator/RatesAdmin';
 
 interface AdminDashboardViewProps {
   projects: Project[];
@@ -134,7 +138,7 @@ export default function AdminDashboardView({
   type DashboardTab =
     | 'admin' | 'upload' | 'inquiries' | 'security'
     | 'timer' | 'missed' | 'entries' | 'team-status' | 'approvals' | 'reports'
-    | 'team' | 'categories';
+    | 'team' | 'categories' | 'site-content' | 'rates';
 
   // Local sub-tab state so they can toggle local view panels smoothly
   const [localTab, setLocalTab] = useState<DashboardTab>(
@@ -229,7 +233,9 @@ export default function AdminDashboardView({
   ];
   const adminWorklogSidebarItems = [
     { label: 'Team', tab: 'team' as const, icon: <UserCog className="h-4 w-4" /> },
-    { label: 'Categories', tab: 'categories' as const, icon: <Briefcase className="h-4 w-4" /> }
+    { label: 'Categories', tab: 'categories' as const, icon: <Briefcase className="h-4 w-4" /> },
+    { label: 'Site Content', tab: 'site-content' as const, icon: <PenSquare className="h-4 w-4" /> },
+    { label: 'Rate Config', tab: 'rates' as const, icon: <Calculator className="h-4 w-4" /> }
   ];
   const sidebarItems = isWorklogAdmin
     ? [...adminSidebarItems, ...worklogSidebarItems, ...adminWorklogSidebarItems]
@@ -690,6 +696,25 @@ export default function AdminDashboardView({
     } catch (err: any) {
       alert(`Error creating file: ${err.message}`);
     }
+  };
+
+  // Pre-fills a new draft exhibit from an inquiry so won leads start as projects.
+  const handleConvertInquiryToExhibit = (inquiry: InquiryRecord) => {
+    handleOpenAddNew();
+    const practiceCategory: Partial<Record<string, ProjectCategory>> = {
+      'Branding & Design': 'Branding',
+      'Commercial Film': 'Commercial',
+      'Fashion Photography': 'Fashion',
+      'Social Strategy': 'Social Media',
+      'Full Campaign Orchestration': 'Commercial'
+    };
+    setTitle(inquiry.company ? `${inquiry.company} — ${inquiry.practice || 'Campaign'}` : `${inquiry.name} — ${inquiry.practice || 'Campaign'}`);
+    setClient(inquiry.company || inquiry.name);
+    setCategory(practiceCategory[inquiry.practice] || 'Branding');
+    setTagline(inquiry.goal.slice(0, 100));
+    setDescription(inquiry.story || inquiry.goal || 'Pending creative brief from client.');
+    setCampaignDetails(inquiry.budget ? `Budget discussed: ${inquiry.budget}` : '');
+    setSaveConfirmation('Exhibit pre-filled from inquiry — review, add media, and publish when ready.');
   };
 
   // Open creation panel
@@ -1835,6 +1860,10 @@ export default function AdminDashboardView({
             <TeamAdmin members={teamMembers} profile={memberProfile} onNotice={setSaveConfirmation} />
           ) : localTab === 'categories' ? (
             <CategoriesAdmin clients={clients} workTypes={workTypes} onNotice={setSaveConfirmation} />
+          ) : localTab === 'site-content' ? (
+            <SiteContentAdmin onNotice={setSaveConfirmation} />
+          ) : localTab === 'rates' ? (
+            <RatesAdmin onNotice={setSaveConfirmation} />
           ) : localTab === 'admin' ? (
             
             // ROSTER OVERVIEW SECTION
@@ -1998,6 +2027,14 @@ export default function AdminDashboardView({
                               {inquiry.nextStep}
                             </span>
                           )}
+                          <button
+                            type="button"
+                            onClick={() => handleConvertInquiryToExhibit(inquiry)}
+                            className="rounded-full border border-[#F9A136]/30 bg-[#F9A136]/10 px-3 py-1 font-mono text-[9px] uppercase tracking-widest text-[#F9A136] transition-colors hover:bg-[#F9A136] hover:text-black"
+                            id={`convert-inquiry-${inquiry.id}`}
+                          >
+                            Convert to Exhibit
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteInquiry(inquiry.id, inquiry.company || inquiry.name)}

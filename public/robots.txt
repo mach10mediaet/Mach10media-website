@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mach10media.et/sitemap.xml

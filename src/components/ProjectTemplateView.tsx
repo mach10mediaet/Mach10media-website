@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { ArrowLeft, ArrowUpRight, Play, Pause, Volume2, VolumeX, Sparkles, Instagram, Globe, ZoomIn, X, ChevronRight } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { ArrowLeft, ArrowUpRight, Play, Pause, Volume2, VolumeX, Sparkles, Instagram, Globe, ZoomIn, X, ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Project } from '../types';
 import { getVideoEmbedUrl, isDirectVideoUrl } from '../utils/video';
@@ -37,11 +37,37 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
 
   const currentIndex = allProjects.findIndex((p) => p.id === project.id);
   const nextProject = allProjects[(currentIndex + 1) % allProjects.length];
+  const prevProject = allProjects[(currentIndex - 1 + allProjects.length) % allProjects.length];
+  const hasSiblingProjects = allProjects.length > 1;
+  const relatedProjects = allProjects
+    .filter((p) => p.category === project.category && p.id !== project.id)
+    .slice(0, 3);
 
   const handleNextProjectClick = () => {
     onNavigateToProject(nextProject.alias);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const handlePrevProjectClick = () => {
+    onNavigateToProject(prevProject.alias);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Lightbox keyboard controls: Esc closes, arrows navigate
+  useEffect(() => {
+    if (activeMediaIndex === null || !project.gallery?.length) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActiveMediaIndex(null);
+      } else if (event.key === 'ArrowRight') {
+        setActiveMediaIndex((prev) => ((prev ?? 0) + 1) % project.gallery!.length);
+      } else if (event.key === 'ArrowLeft') {
+        setActiveMediaIndex((prev) => ((prev ?? 0) === 0 ? project.gallery!.length - 1 : (prev ?? 0) - 1));
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeMediaIndex, project.gallery?.length]);
 
   const primaryVideoUrl = project.fullVideoUrl || project.videoUrl;
   const embeddedVideoUrl = getVideoEmbedUrl(primaryVideoUrl);
@@ -60,9 +86,30 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
             <span>Back to Exhibits</span>
           </button>
 
-          <div className="font-mono text-[9px] tracking-[0.2em] text-[#525252] uppercase hidden sm:block">
-            ARCHIVE ENTRY ID: {project.id} &bull; CLIENT: {project.client.split(' ')[0]}
-          </div>
+          {hasSiblingProjects ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handlePrevProjectClick}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/40 text-[#a3a3a3] hover:border-[#F9A136]/50 hover:text-[#F9A136] transition-all"
+                title={`Previous exhibit: ${prevProject.title}`}
+                id="project-prev-quick-button"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                onClick={handleNextProjectClick}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/40 text-[#a3a3a3] hover:border-[#F9A136]/50 hover:text-[#F9A136] transition-all"
+                title={`Next exhibit: ${nextProject.title}`}
+                id="project-next-quick-button"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="font-mono text-[9px] tracking-[0.2em] text-[#525252] uppercase hidden sm:block">
+              ARCHIVE ENTRY ID: {project.id} &bull; CLIENT: {project.client.split(' ')[0]}
+            </div>
+          )}
         </div>
       </div>
 
@@ -120,7 +167,7 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
               </div>
               <div className="flex border-b border-white/5 py-2">
                 <span className="text-neutral-600 w-28 uppercase tracking-widest">Launch</span>
-                <span>Autumn Collection '{project.year}'</span>
+                <span>Collection '{project.year}'</span>
               </div>
               {project.socialLinks && (
                 <div className="flex border-b border-white/5 py-2">
@@ -248,6 +295,42 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
                 <div key={i} className="border-l border-white/10 pl-6 py-2 group hover:border-[#F9A136]/60 transition-all">
                   <p className="font-mono text-[8.5px] tracking-[0.2em] text-[#525252] group-hover:text-[#F9A136] uppercase mb-1 transition-colors">{cr.role}</p>
                   <p className="font-sans text-sm text-neutral-300 group-hover:text-white transition-colors">{cr.name}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {relatedProjects.length > 0 && (
+          <section className="mb-28 border-t border-white/5 pt-16">
+            <p className="font-mono text-[10px] tracking-[0.3em] text-[#525252] uppercase mb-8">
+              MORE FROM {project.category.toUpperCase()}
+            </p>
+            <div className="grid gap-6 sm:grid-cols-3">
+              {relatedProjects.map((related) => (
+                <div
+                  key={related.id}
+                  onClick={() => {
+                    onNavigateToProject(related.alias);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="group cursor-pointer overflow-hidden border border-white/5 bg-[#0c0c0c]/40 p-2.5 hover:border-white/15 transition-colors"
+                >
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img
+                      src={related.heroImage}
+                      alt={related.title}
+                      referrerPolicy="no-referrer"
+                      loading="lazy"
+                      className="h-full w-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 saturate-75 brightness-90"
+                    />
+                  </div>
+                  <div className="px-1.5 py-3">
+                    <p className="font-mono text-[8.5px] tracking-widest text-[#525252] uppercase">{related.client} &bull; {related.year}</p>
+                    <h4 className="font-sans text-sm font-medium text-white group-hover:text-[#F9A136] transition-colors truncate mt-1 uppercase">
+                      {related.title}
+                    </h4>
+                  </div>
                 </div>
               ))}
             </div>

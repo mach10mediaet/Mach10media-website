@@ -14,15 +14,59 @@ const AboutView = lazy(() => import('./components/AboutView'));
 const ContactView = lazy(() => import('./components/ContactView'));
 const AdminDashboardView = lazy(() => import('./components/AdminDashboardView'));
 const AdminLockGate = lazy(() => import('./components/AdminLockGate'));
+const CalculatorView = lazy(() => import('./calculator/CalculatorView'));
 
 import { INITIAL_PROJECTS } from './data/mockProjects';
 import { Project, ActiveView, AppDiagnosticEvent, MemberProfile, MemberRole } from './types';
 import { motion, AnimatePresence } from 'motion/react';
+import { Analytics } from '@vercel/analytics/react';
 import { Mail, Instagram, ShieldAlert } from 'lucide-react';
 
 import { collection, doc, getDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { auth, db, signInWithGoogle } from './firebase';
+
+// ── Path-based routing (SPA) ──
+// `/work/:alias` deep-links to projects; admin stays on the `#/slug` hash route.
+const PUBLIC_VIEW_PATHS: Partial<Record<ActiveView, string>> = {
+  home: '/',
+  work: '/work',
+  services: '/services',
+  about: '/about',
+  contact: '/contact',
+  calculator: '/rates'
+};
+
+const PAGE_TITLES: Partial<Record<ActiveView, string>> = {
+  home: 'Mach10 Media — Branding, Marketing & Media Production in Addis Ababa',
+  work: 'Selected Works — Mach10 Media',
+  services: 'Services & Packages — Mach10 Media',
+  about: 'About the Studio — Mach10 Media',
+  contact: 'Start a Project — Mach10 Media',
+  calculator: 'Rate Estimator — Mach10 Media'
+};
+
+function parseLocation(pathname: string): { view: ActiveView; alias: string | null } {
+  const path = pathname.replace(/\/+$/, '') || '/';
+  if (path.startsWith('/work/')) {
+    const alias = decodeURIComponent(path.slice('/work/'.length));
+    if (alias) return { view: 'project', alias };
+  }
+  switch (path) {
+    case '/work':
+      return { view: 'work', alias: null };
+    case '/services':
+      return { view: 'services', alias: null };
+    case '/about':
+      return { view: 'about', alias: null };
+    case '/contact':
+      return { view: 'contact', alias: null };
+    case '/rates':
+      return { view: 'calculator', alias: null };
+    default:
+      return { view: 'home', alias: null };
+  }
+}
 
 // Admins are the hardcoded allowlist; employees must have an active team_members
 // doc keyed by their lowercased email. Admin allowlist always wins for admins.
@@ -50,10 +94,42 @@ async function resolveMemberProfile(user: User): Promise<MemberProfile | null> {
 }
 
 export default function App() {
-  // Navigation states
-  const [activeView, setActiveView] = useState<ActiveView>('home');
-  const [selectedProjectAlias, setSelectedProjectAlias] = useState<string | null>(null);
+  // Navigation states — initialized from the URL so deep links and refreshes land correctly
+  const initialRoute = parseLocation(window.location.pathname);
+  const [activeView, setActiveView] = useState<ActiveView>(initialRoute.view);
+  const [selectedProjectAlias, setSelectedProjectAlias] = useState<string | null>(initialRoute.alias);
   const [isLoadingScreen, setIsLoadingScreen] = useState<boolean>(true);
+
+  // Push a clean path for every public navigation; admin/upload stay hash-driven.
+  const navigate = (view: ActiveView, alias?: string | null) => {
+    if (view === 'admin' || view === 'upload') {
+      setActiveView(view);
+      return;
+    }
+    const path = view === 'project'
+      ? `/work/${encodeURIComponent(alias || '')}`
+      : PUBLIC_VIEW_PATHS[view] || '/';
+    window.history.pushState({}, '', path);
+    setSelectedProjectAlias(view === 'project' ? alias || null : null);
+    setActiveView(view);
+  };
+
+  // Browser back/forward support
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = parseLocation(window.location.pathname);
+      setActiveView(route.view);
+      setSelectedProjectAlias(route.alias);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Per-view document titles (project titles handled below)
+  useEffect(() => {
+    if (activeView === 'project') return;
+    document.title = PAGE_TITLES[activeView] || PAGE_TITLES.home as string;
+  }, [activeView]);
 
   // Safety automatic dismissal of the loading screen after 8 seconds max
   useEffect(() => {
@@ -70,6 +146,13 @@ export default function App() {
 
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [memberProfile, setMemberProfile] = useState<MemberProfile | null>(null);
+  const [contactPracticePreset, setContactPracticePreset] = useState<string | undefined>(undefined);
+
+  // Services package CTAs pre-select the matching practice on the inquiry form.
+  const handleNavigateToContact = (practice?: string) => {
+    setContactPracticePreset(practice);
+    navigate('contact');
+  };
 
   const setAdminSlug = (newSlug: string) => {
     setAdminSlugState(newSlug);
@@ -173,6 +256,7 @@ export default function App() {
     });
     setMemberProfile(null);
     setActiveView('home');
+    window.history.pushState({}, '', '/');
     window.location.hash = '';
   };
 
@@ -271,8 +355,7 @@ export default function App() {
 
   // Handle immersive project detail trigger
   const handleNavigateToProject = (alias: string) => {
-    setSelectedProjectAlias(alias);
-    setActiveView('project');
+    navigate('project', alias);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -280,6 +363,13 @@ export default function App() {
     (project) => project.publishState !== 'draft' && !project.archived
   );
   const selectedProject = publicProjects.find(p => p.alias === selectedProjectAlias);
+
+  // Project detail pages get their own document title
+  useEffect(() => {
+    if (activeView === 'project') {
+      document.title = selectedProject ? `${selectedProject.title} — Mach10 Media` : 'Mach10 Media';
+    }
+  }, [activeView, selectedProject]);
   const viewFallback = (
     <div className="flex h-screen items-center justify-center bg-black px-6 text-center text-white">
       <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-400">Loading view...</p>
@@ -294,7 +384,7 @@ export default function App() {
           <HomeView
             projects={publicProjects}
             onNavigateToProject={handleNavigateToProject}
-            onNavigate={setActiveView}
+            onNavigate={navigate}
           />
         );
       case 'work':
@@ -320,7 +410,7 @@ export default function App() {
           />
         );
       case 'services':
-        return <ServicesView onNavigate={setActiveView} />;
+        return <ServicesView onNavigateToContact={handleNavigateToContact} />;
       case 'project':
         if (!selectedProject) {
           return (
@@ -340,14 +430,21 @@ export default function App() {
           <ProjectTemplateView
             project={selectedProject}
             allProjects={publicProjects}
-            onBack={() => setActiveView('work')}
+            onBack={() => navigate('work')}
             onNavigateToProject={handleNavigateToProject}
           />
         );
       case 'about':
         return <AboutView />;
+      case 'calculator':
+        return <CalculatorView />;
       case 'contact':
-        return <ContactView />;
+        return (
+          <ContactView
+            initialPractice={contactPracticePreset}
+            onPresetConsumed={() => setContactPracticePreset(undefined)}
+          />
+        );
       case 'admin':
         if (!firebaseUser || !memberProfile) {
           return (
@@ -395,7 +492,7 @@ export default function App() {
           />
         );
       default:
-        return <HomeView projects={publicProjects} onNavigateToProject={handleNavigateToProject} onNavigate={setActiveView} />;
+        return <HomeView projects={publicProjects} onNavigateToProject={handleNavigateToProject} onNavigate={navigate} />;
     }
   };
 
@@ -443,7 +540,10 @@ export default function App() {
           <CustomCursor />
 
           {/* 2. Floating primary menu bar */}
-          <Header activeView={activeView} onNavigate={setActiveView} />
+          <Header activeView={activeView} onNavigate={navigate} />
+
+          {/* Privacy-friendly traffic analytics (Vercel) */}
+          <Analytics />
 
           {/* 3. Screen display router with fade-in animation wrap */}
           <main id="app-main-viewports">
@@ -504,7 +604,7 @@ export default function App() {
                     ].map((item) => (
                       <button
                         key={item.view}
-                        onClick={() => { setActiveView(item.view); window.scrollTo(0, 0); }}
+                        onClick={() => { navigate(item.view); window.scrollTo(0, 0); }}
                         className="flex w-full items-center justify-between rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3 text-left font-sans text-sm text-neutral-300 transition-colors hover:border-white/15 hover:text-white md:text-[15px]"
                       >
                         <span>{item.label}</span>

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Send, MapPin, Sparkles, Mail, Phone, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Send, MapPin, Sparkles, Mail, Phone, CheckCircle2, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useSiteSetting } from '../hooks/useSiteSetting';
 
 type BudgetTier = 'under-50k' | '50k-100k' | '100k-250k' | 'over-250k';
 type Currency = 'USD' | 'ETB';
@@ -25,15 +26,15 @@ const budgetThresholds: BudgetTier[] = [
 const budgetLabels: Record<Currency, Record<BudgetTier, string>> = {
   USD: {
     'under-50k': '< $500',
-    '50k-100k': '$500 - $1000',
-    '100k-250k': '$1000 - $1500',
-    'over-250k': '> $2000'
+    '50k-100k': '$500 – $1,000',
+    '100k-250k': '$1,000 – $2,000',
+    'over-250k': '> $2,000'
   },
   ETB: {
     'under-50k': '< ETB 50K',
-    '50k-100k': 'ETB 50K - 70K',
-    '100k-250k': 'ETB 70K - 100K',
-    'over-250k': '> ETB 150K'
+    '50k-100k': 'ETB 50K – 100K',
+    '100k-250k': 'ETB 100K – 250K',
+    'over-250k': '> ETB 250K'
   }
 };
 
@@ -115,12 +116,12 @@ const getSegmentButtonClass = (isActive: boolean, tone: 'light' | 'accent' = 'li
       : 'text-[#efe7db] hover:text-white'
   }`;
 
-export default function ContactView() {
+export default function ContactView({ initialPractice, onPresetConsumed }: { initialPractice?: string; onPresetConsumed?: () => void }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     company: '',
-    practice: 'Branding & Design',
+    practice: initialPractice || 'Branding & Design',
     budget: '50k-100k' as BudgetTier,
     goal: 'Launch a campaign' as GoalOption,
     platforms: ['Instagram', 'Website'] as PlatformOption[],
@@ -135,6 +136,18 @@ export default function ContactView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [emailFailed, setEmailFailed] = useState(false);
+  const [inquiryReference, setInquiryReference] = useState('');
+  const bookingUrl = useSiteSetting('booking_url');
+
+  // Consume the package preset once on mount (App remounts this view per navigation).
+  const preset = initialPractice;
+  useEffect(() => {
+    if (preset) {
+      setFormData((prev) => ({ ...prev, practice: preset }));
+      onPresetConsumed?.();
+    }
+  }, []);
   const [pricingMode, setPricingMode] = useState<PricingMode>('range');
   const [currency, setCurrency] = useState<Currency>('USD');
   const [exactBudget, setExactBudget] = useState('');
@@ -198,6 +211,9 @@ export default function ContactView() {
 
     setIsSubmitting(true);
     setSubmitError(null);
+    setEmailFailed(false);
+
+    const referenceId = 'ARX-' + Math.random().toString(36).slice(2, 7).toUpperCase();
 
     const inquiryPayload = {
       name: formData.name,
@@ -219,31 +235,40 @@ export default function ContactView() {
       recommendedPackage: '',
       referralSource: formData.referralSource,
       story: formData.story || '',
+      referenceId,
       status: 'new',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
 
     try {
+      // The Firestore record is the source of truth — the notification email is
+      // best-effort and must never fail the submission on its own.
       await addDoc(collection(db, 'inquiries'), inquiryPayload);
-      await sendInquiryNotificationEmail({
-        name: inquiryPayload.name,
-        email: inquiryPayload.email,
-        company: inquiryPayload.company,
-        practice: inquiryPayload.practice,
-        nextStep: inquiryPayload.nextStep,
-        goal: inquiryPayload.goal,
-        budget: inquiryPayload.budget,
-        platforms: inquiryPayload.platforms,
-        deliverables: inquiryPayload.deliverables,
-        callType: inquiryPayload.callType,
-        meetingDay: inquiryPayload.meetingDay,
-        estimateSummary: inquiryPayload.estimateSummary,
-        recommendedPackage: inquiryPayload.recommendedPackage,
-        referralSource: inquiryPayload.referralSource,
-        story: inquiryPayload.story
-      });
+      try {
+        await sendInquiryNotificationEmail({
+          name: inquiryPayload.name,
+          email: inquiryPayload.email,
+          company: inquiryPayload.company,
+          practice: inquiryPayload.practice,
+          nextStep: inquiryPayload.nextStep,
+          goal: inquiryPayload.goal,
+          budget: inquiryPayload.budget,
+          platforms: inquiryPayload.platforms,
+          deliverables: inquiryPayload.deliverables,
+          callType: inquiryPayload.callType,
+          meetingDay: inquiryPayload.meetingDay,
+          estimateSummary: inquiryPayload.estimateSummary,
+          recommendedPackage: inquiryPayload.recommendedPackage,
+          referralSource: inquiryPayload.referralSource,
+          story: inquiryPayload.story
+        });
+      } catch (emailError) {
+        console.error('Inquiry saved but the notification email failed:', emailError);
+        setEmailFailed(true);
+      }
 
+      setInquiryReference(referenceId);
       setTimeout(() => {
         setIsSubmitting(false);
         setSubmitted(true);
@@ -581,10 +606,11 @@ export default function ContactView() {
                     </h3>
                     <p className="mx-auto max-w-md font-sans text-xs font-light leading-relaxed text-[#a3a3a3]">
                       Your details are queued for review. A partner reaches out within 48 business hours.
+                      {emailFailed && ' Your inquiry is safely stored — the email alert to our team was delayed, but it appears in our dashboard.'}
                     </p>
 
                     <div className="mx-auto mt-8 max-w-sm border-t border-white/5 pt-6 font-mono text-[10px] text-neutral-500">
-                      <p className="uppercase">INQUIRY REF: ARX-{Math.floor(Math.random() * 90000) + 10000}</p>
+                      <p className="uppercase">INQUIRY REF: {inquiryReference}</p>
                       <p className="mt-1">MACH10 MEDIA GROUP - ADDIS ABABA</p>
                     </div>
 
@@ -617,6 +643,25 @@ export default function ContactView() {
               </div>
             </div>
 
+            {bookingUrl && (
+              <div className="border border-[#F9A136]/25 bg-[#F9A136]/5 p-5">
+                <p className="font-mono text-[10px] tracking-[0.22em] text-[#F9A136] uppercase mb-3">SKIP THE WAIT</p>
+                <p className="font-sans text-sm font-light leading-relaxed text-neutral-300 mb-4">
+                  Prefer to lock a time right now? Pick a slot directly on our live calendar.
+                </p>
+                <a
+                  href={bookingUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#F9A136]/50 bg-[#F9A136]/10 px-5 py-2.5 font-mono text-[10px] tracking-widest text-[#F9A136] uppercase transition-colors hover:bg-[#F9A136] hover:text-black"
+                  id="instant-booking-link"
+                >
+                  <span>Open Booking Calendar</span>
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            )}
+
             <div>
               <p className="font-mono text-[12px] tracking-[0.3em] text-[#525252] uppercase mb-6">OUR OFFICE</p>
               
@@ -632,14 +677,24 @@ export default function ContactView() {
                       {office.address}
                     </p>
                     <div className="mt-2.5 flex flex-col space-y-1 font-mono text-[15px] text-[#737373]">
-                      <span className="flex items-center gap-1.5">
+                      <a href={`mailto:${office.email}`} className="flex items-center gap-1.5 hover:text-[#F9A136] transition-colors">
                         <Mail className="h-3 w-3" />
-                        <span className="hover:text-[#F9A136] cursor-pointer transition-colors">{office.email}</span>
-                      </span>
-                      <span className="flex items-center gap-1.5">
+                        <span>{office.email}</span>
+                      </a>
+                      <a href="tel:+251920969486" className="flex items-center gap-1.5 hover:text-[#F9A136] transition-colors">
                         <Phone className="h-3 w-3" />
                         <span>{office.phone}</span>
-                      </span>
+                      </a>
+                      <a
+                        href="https://wa.me/251920969486?text=Hello%20Mach10%20Media%20—%20I%27d%20like%20to%20discuss%20a%20project."
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1.5 mt-1.5 w-fit rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-[11px] tracking-wider text-emerald-300 uppercase transition-colors hover:bg-emerald-500 hover:text-black"
+                        id="whatsapp-contact-button"
+                      >
+                        <span>Chat on WhatsApp</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
                     </div>
                   </div>
                 ))}

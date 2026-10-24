@@ -25,6 +25,7 @@ export default function Header({ activeView, onNavigate }: HeaderProps) {
     { label: 'Home', view: 'home' },
     { label: 'Work', view: 'work' },
     { label: 'Services', view: 'services' },
+    { label: 'Rates', view: 'calculator' },
     { label: 'About', view: 'about' },
     { label: 'Contact', view: 'contact' },
   ];

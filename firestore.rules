@@ -88,11 +88,12 @@ service cloud.firestore {
                'recommendedPackage',
                'referralSource',
                'story',
+               'referenceId',
                'status',
                'createdAt',
                'updatedAt'
              ]) &&
-             data.keys().size() == 22 &&
+             data.keys().size() == 23 &&
              data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
              data.email is string && data.email.size() > 3 && data.email.size() <= 160 &&
              data.company is string && data.company.size() <= 160 &&
@@ -144,6 +145,52 @@ service cloud.firestore {
                     incoming().createdAt == request.time &&
                     incoming().updatedAt == request.time;
       allow get, list, update, delete: if isAdmin();
+    }
+
+    // ── Editable site content: testimonials, client logos, key/value settings ──
+
+    function isValidTestimonial(data) {
+      return data.keys().hasOnly(['quote', 'author', 'company', 'order', 'isActive', 'createdAt']) &&
+             data.keys().hasAll(['quote', 'author', 'company', 'order', 'isActive', 'createdAt']) &&
+             data.quote is string && data.quote.size() > 0 && data.quote.size() <= 500 &&
+             data.author is string && data.author.size() > 0 && data.author.size() <= 80 &&
+             data.company is string && data.company.size() <= 80 &&
+             data.order is number && data.order >= 0 && data.order <= 1000 &&
+             data.isActive is bool;
+    }
+
+    function isValidClientLogo(data) {
+      return data.keys().hasOnly(['name', 'logoUrl', 'order', 'isActive', 'createdAt']) &&
+             data.keys().hasAll(['name', 'logoUrl', 'order', 'isActive', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 40 &&
+             data.logoUrl is string && data.logoUrl.size() <= 1000 &&
+             data.order is number && data.order >= 0 && data.order <= 1000 &&
+             data.isActive is bool;
+    }
+
+    match /testimonials/{entryId} {
+      allow get, list: if true;
+      allow create: if isAdmin() && isValidId(entryId) && isValidTestimonial(incoming()) && incoming().createdAt == request.time;
+      allow update: if isAdmin() && isValidId(entryId) && incoming().createdAt == existing().createdAt && isValidTestimonial(incoming());
+      allow delete: if isAdmin() && isValidId(entryId);
+    }
+
+    match /client_logos/{entryId} {
+      allow get, list: if true;
+      allow create: if isAdmin() && isValidId(entryId) && isValidClientLogo(incoming()) && incoming().createdAt == request.time;
+      allow update: if isAdmin() && isValidId(entryId) && incoming().createdAt == existing().createdAt && isValidClientLogo(incoming());
+      allow delete: if isAdmin() && isValidId(entryId);
+    }
+
+    // Key/value display settings (booking_url, instagram_embed_url). Values are
+    // admin-authored display strings, safe to expose publicly.
+    match /site_settings/{settingKey} {
+      allow get, list: if true;
+      allow write: if isAdmin() &&
+                   isValidId(settingKey) &&
+                   incoming().keys().hasOnly(['value', 'updatedAt']) &&
+                   incoming().value is string && incoming().value.size() <= 1000 &&
+                   incoming().updatedAt == request.time;
     }
 
     // ── Work-Log feature: team members, categories, time entries ──

@@ -7,3 +7,6 @@ coverage/
 .env*
 !.env.example
 .zcode/
+
+# Playwright MCP test artifacts
+.playwright-mcp/

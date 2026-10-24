@@ -1,9 +1,17 @@
 import { ArrowUpRight, Sparkles, Clapperboard, Camera, Layers3, Rocket } from 'lucide-react';
-import { SERVICE_PACKAGES } from '../data/servicePackages';
+import { SERVICE_PACKAGES, ServicePackage } from '../data/servicePackages';
 
 interface ServicesViewProps {
-  onNavigate: (view: 'contact') => void;
+  onNavigateToContact: (practice?: string) => void;
 }
+
+// Maps each package onto the matching inquiry-form practice so the form opens pre-selected.
+const PACKAGE_PRACTICE: Record<ServicePackage['key'], string> = {
+  'video-production': 'Commercial Film',
+  photoshoot: 'Fashion Photography',
+  'content-retainer': 'Social Strategy',
+  'campaign-package': 'Full Campaign Orchestration'
+};
 
 const packageIcons = {
   'video-production': Clapperboard,
@@ -35,7 +43,7 @@ const processSteps = [
   }
 ];
 
-export default function ServicesView({ onNavigate }: ServicesViewProps) {
+export default function ServicesView({ onNavigateToContact }: ServicesViewProps) {
   return (
     <div className="bg-transparent min-h-screen text-[#f2f2f2] pt-36 pb-24 px-6 md:px-12">
       <div className="mx-auto max-w-7xl">
@@ -99,6 +107,17 @@ export default function ServicesView({ onNavigate }: ServicesViewProps) {
                     {service.fit}
                   </p>
                 </div>
+
+                <div className="mt-6 border-t border-white/6 pt-5">
+                  <button
+                    onClick={() => onNavigateToContact(PACKAGE_PRACTICE[service.key])}
+                    className="group/cta inline-flex w-full items-center justify-between rounded-full border border-white/15 bg-white/5 px-6 py-3.5 font-mono text-[10px] tracking-[0.16em] text-white uppercase transition-all duration-500 hover:border-[#F9A136] hover:bg-[#F9A136] hover:text-black"
+                    id={`package-inquiry-${service.key}`}
+                  >
+                    <span>Start This Project</span>
+                    <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" />
+                  </button>
+                </div>
               </div>
             );
           })}
@@ -138,7 +157,7 @@ export default function ServicesView({ onNavigate }: ServicesViewProps) {
             </div>
 
             <button
-              onClick={() => onNavigate('contact')}
+              onClick={() => onNavigateToContact()}
               className="group inline-flex items-center justify-center rounded-full bg-white px-7 py-3.5 font-mono text-[11px] tracking-[0.16em] text-black uppercase transition-all duration-500 hover:scale-[1.03] hover:bg-[#F9A136]"
             >
               <span>Start Your Inquiry</span>

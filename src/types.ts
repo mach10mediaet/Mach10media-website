@@ -53,7 +53,7 @@ export interface Project {
   };
 }
 
-export type ActiveView = 'home' | 'work' | 'services' | 'project' | 'about' | 'contact' | 'admin' | 'upload';
+export type ActiveView = 'home' | 'work' | 'services' | 'project' | 'about' | 'contact' | 'calculator' | 'admin' | 'upload';
 
 // ── Work-Log (time tracking) ──
 
@@ -111,4 +111,25 @@ export interface TimeEntryPause {
   id: string;
   pausedAt: number;
   resumedAt: number | null;
+}
+
+// ── Editable site content ──
+
+export interface Testimonial {
+  id: string;
+  quote: string;
+  author: string;
+  company: string;
+  order: number;
+  isActive: boolean;
+  createdAt?: any;
+}
+
+export interface ClientLogo {
+  id: string;
+  name: string;
+  logoUrl: string; // '' renders as a text wordmark
+  order: number;
+  isActive: boolean;
+  createdAt?: any;
 }

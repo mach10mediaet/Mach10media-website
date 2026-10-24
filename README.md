@@ -2,6 +2,8 @@
 
 Mach10 Media's portfolio site is a Vite + React + TypeScript frontend backed by Firebase Authentication and Cloud Firestore.
 
+The public site uses real paths (`/work`, `/services`, `/work/:alias` for projects) with SPA rewrites from [vercel.json](/Users/susu/Documents/Work%20/Mach10/MACH10MEDIA.COM/mach10-media-portfolio/vercel.json), per-view document titles, [sitemap.xml](/Users/susu/Documents/Work%20/Mach10/MACH10MEDIA.COM/mach10-media-portfolio/public/sitemap.xml) + robots.txt, and Vercel Analytics. Testimonials, client logos, the booking-calendar link, and the Instagram embed are admin-managed under the dashboard's **Site Content** tab (Firestore collections `testimonials`, `client_logos`, `site_settings`); built-in fallbacks render until those collections are filled.
+
 ## Stack
 
 - Vite
