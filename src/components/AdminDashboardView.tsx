@@ -12,7 +12,7 @@ import {
 } from '../types';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { collection, doc, setDoc, deleteDoc, onSnapshot, orderBy, query, serverTimestamp, updateDoc, where, limit } from 'firebase/firestore';
-import { db, auth, handleFirestoreError, OperationType, signInWithGoogle, getAccessToken, setAccessToken, firebaseProjectId, firestoreDatabaseLabel } from '../firebase';
+import { db, auth, handleFirestoreError, OperationType, signInWithGoogle, signInWithDriveScope, getAccessToken, setAccessToken, firebaseProjectId, firestoreDatabaseLabel } from '../firebase';
 import {
   LayoutDashboard,
   PlusCircle,
@@ -446,7 +446,7 @@ export default function AdminDashboardView({
 
   const handleGoogleDriveConnect = async () => {
     try {
-      const response = await signInWithGoogle();
+      const response = await signInWithDriveScope();
       if (response && response.accessToken) {
         setDriveToken(response.accessToken);
         setUploadToDrive(true);

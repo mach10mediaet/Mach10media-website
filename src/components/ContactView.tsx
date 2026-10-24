@@ -138,6 +138,8 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [emailFailed, setEmailFailed] = useState(false);
   const [inquiryReference, setInquiryReference] = useState('');
+  // Honeypot: bots autofill hidden "website" fields; humans never see it.
+  const [honeypot, setHoneypot] = useState('');
   const bookingUrl = useSiteSetting('booking_url');
 
   // Consume the package preset once on mount (App remounts this view per navigation).
@@ -209,6 +211,20 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
       return;
     }
 
+    // Honeypot tripped: pretend success without writing anything.
+    if (honeypot) {
+      setInquiryReference('ARX-' + Math.random().toString(36).slice(2, 7).toUpperCase());
+      setSubmitted(true);
+      return;
+    }
+
+    // Cheap client-side throttle: one submission per 30s per visitor.
+    const lastSubmitAt = Number(sessionStorage.getItem('mach10_inquiry_submitted_at') || 0);
+    if (Date.now() - lastSubmitAt < 30_000) {
+      setSubmitError('Your previous inquiry was just received. Please wait a moment before sending another.');
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
     setEmailFailed(false);
@@ -269,6 +285,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
       }
 
       setInquiryReference(referenceId);
+      sessionStorage.setItem('mach10_inquiry_submitted_at', String(Date.now()));
       setTimeout(() => {
         setIsSubmitting(false);
         setSubmitted(true);
@@ -314,6 +331,20 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                       {submitError}
                     </div>
                   )}
+
+                  {/* Honeypot — visually hidden, ignored by humans, autofilled by bots */}
+                  <div aria-hidden="true" className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden">
+                    <label htmlFor="company-website">Website</label>
+                    <input
+                      id="company-website"
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                    />
+                  </div>
 
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div className="border-b border-white/10 py-2.5 transition-all focus-within:border-white">

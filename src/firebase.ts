@@ -27,7 +27,6 @@ const dbId = (firebaseConfig as any).firestoreDatabaseId;
 export const db = dbId ? getFirestore(app, dbId) : getFirestore(app);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
-googleProvider.addScope('https://www.googleapis.com/auth/drive');
 
 // Cache the access token in memory
 let cachedAccessToken: string | null = null;
@@ -40,7 +39,8 @@ export function setAccessToken(token: string | null) {
   cachedAccessToken = token;
 }
 
-// Standard login helper that prefers popups as per preview iframe constraints
+// Standard login helper that prefers popups as per preview iframe constraints.
+// Deliberately unscoped: the base session must not carry Drive access.
 export async function signInWithGoogle() {
   try {
     const result = await signInWithPopup(auth, googleProvider);
@@ -55,6 +55,20 @@ export async function signInWithGoogle() {
     console.error('Google Sign In Error:', error);
     throw error;
   }
+}
+
+// Drive access is requested only when the admin explicitly connects Drive
+// (Media Lab), so a routine studio sign-in never holds Drive-scoped tokens.
+export async function signInWithDriveScope() {
+  const driveProvider = new GoogleAuthProvider();
+  driveProvider.addScope('https://www.googleapis.com/auth/drive');
+  const result = await signInWithPopup(auth, driveProvider);
+  const credential = GoogleAuthProvider.credentialFromResult(result);
+  const accessToken = credential?.accessToken ?? null;
+  if (accessToken) {
+    cachedAccessToken = accessToken;
+  }
+  return { user: result.user, accessToken };
 }
 
 export enum OperationType {
