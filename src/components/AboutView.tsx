@@ -51,7 +51,7 @@ const teamMembers = [
         
         {/* Header Block */}
         <div className="mb-20 border-b border-white/5 pb-10">
-          <div className="flex items-center space-x-2 mb-4 text-[#737373] font-mono text-[14px] tracking-[0.3em] uppercase">
+          <div className="flex items-center space-x-2 mb-4 text-[#a3a3a3] font-mono text-[14px] tracking-[0.3em] uppercase">
             <Sparkles className="h-3 w-3 animate-pulse" />
             <span>THE CREATIVE COVENANT</span>
           </div>
@@ -76,7 +76,7 @@ const teamMembers = [
           </div>
 
           <div className="lg:col-span-8 flex flex-col justify-center">
-            <p className="font-mono text-[16px] tracking-[0.3em] text-[#737373] uppercase mb-4">FOUNDING MANIFESTO</p>
+            <p className="font-mono text-[16px] tracking-[0.3em] text-[#a3a3a3] uppercase mb-4">FOUNDING MANIFESTO</p>
             <p className="font-sans text-lg font-light leading-relaxed text-neutral-300">
               Mach10 Media is a digital creative team based in Addis Ababa. We help businesses create content, visuals, and digital campaigns that feel clear, intentional, and true to their brand.
 
@@ -84,7 +84,7 @@ We work across social media, photography, video, branding, and digital strategy.
 
 We’re a close-knit creative team that cares deeply about quality, consistency, and creating work that helps brands connect with people in a real way.
             </p>
-            <p className="mt-6 font-sans text-base font-light leading-relaxed text-[#737373]">
+            <p className="mt-6 font-sans text-base font-light leading-relaxed text-[#a3a3a3]">
               Whether capturing midnight runs with a local run club, documenting burgers served in motion beside airport gates, or framing active construction sites as they evolve in real time, our methodology remains unchanged: begin in negative space, isolate the core emotional variable, and render it with precise visual clarity.
             </p>
           </div>
@@ -92,7 +92,7 @@ We’re a close-knit creative team that cares deeply about quality, consistency,
 
         {/* SECTION 2 - PHILOSOPHY PILLARS */}
         <section className="mb-28 border-y border-white/5 py-24 bg-[#0c0c0c]/20">
-          <p className="font-mono text-[15px] tracking-[0.3em] text-[#737373] uppercase mb-16 text-center">THE ETHICAL BLUEPRINT</p>
+          <p className="font-mono text-[15px] tracking-[0.3em] text-[#a3a3a3] uppercase mb-16 text-center">THE ETHICAL BLUEPRINT</p>
           <div className="grid gap-8 sm:grid-cols-3 px-4 md:px-8">
             {coreValues.map((val, i) => (
               <div key={i} className="flex flex-col items-center sm:items-start text-center sm:text-left border border-white/5 bg-[#0a0a0a]/40 p-6 md:p-8 hover:border-white/10 transition-colors duration-500">
@@ -112,7 +112,7 @@ We’re a close-knit creative team that cares deeply about quality, consistency,
 
         {/* SECTION 3 - THE DIRECTOR PANELS */}
         <section className="mb-28">
-          <p className="font-mono text-[15px] tracking-[0.3em] text-[#737373] uppercase mb-12">STUDIO ARCHITECTS</p>
+          <p className="font-mono text-[15px] tracking-[0.3em] text-[#a3a3a3] uppercase mb-12">STUDIO ARCHITECTS</p>
           <div className="grid gap-10 sm:grid-cols-3">
             {teamMembers.map((member, i) => (
               <div key={i} className="group overflow-hidden border border-white/5 bg-[#0c0c0c]/30 p-3 hover:border-white/10 transition-all duration-700">
@@ -126,7 +126,7 @@ We’re a close-knit creative team that cares deeply about quality, consistency,
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
                 </div>
                 <h4 className="font-sans text-lg font-[500] text-white uppercase tracking-tight">{member.name}</h4>
-                <p className="font-mono text-[14px] tracking-widest text-[#737373] uppercase mt-1">{member.role}</p>
+                <p className="font-mono text-[14px] tracking-widest text-[#a3a3a3] uppercase mt-1">{member.role}</p>
                 <div className="h-px bg-white/5 my-3" />
                 <p className="font-sans text-base text-neutral-400 font-light leading-relaxed">{member.specialty}</p>
               </div>

@@ -89,7 +89,7 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
           <div className="flex items-start gap-4">
             <span
               className={`pt-0.5 font-mono text-xs transition-colors ${
-                engagementReport ? 'text-[#F9A136]' : 'text-[#525252]'
+                engagementReport ? 'text-[#F9A136]' : 'text-[#8c8c8c]'
               }`}
             >
               05

@@ -92,7 +92,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
           <span className="mr-2.5 font-mono text-xs text-[#F9A136]">04</span>
           Extra Channels
         </h2>
-        <span className="font-mono text-[10px] tracking-[0.16em] text-[#6b6b6b] uppercase">
+        <span className="font-mono text-[10px] tracking-[0.16em] text-[#8c8c8c] uppercase">
           Optional Add-ons
         </span>
       </div>

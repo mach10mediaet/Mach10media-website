@@ -97,7 +97,9 @@ export default function Header({ activeView, onNavigate }: HeaderProps) {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="flex h-10 w-10 items-center justify-center border border-white/5 bg-[#121212]/80 text-white hover:border-[#F9A136]/50 hover:text-[#F9A136] lg:hidden transition-colors"
-            aria-label="Toggle menu"
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-nav-drawer"
             id="mobile-drawer-toggle"
           >
             {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -120,7 +122,7 @@ export default function Header({ activeView, onNavigate }: HeaderProps) {
               className="group flex items-baseline text-left"
               style={{ transitionDelay: `${index * 50}ms` }}
             >
-              <span className="font-mono text-xs text-[#525252] mr-4 group-hover:text-[#F9A136] transition-colors">0{index + 1}</span>
+              <span className="font-mono text-xs text-[#8c8c8c] mr-4 group-hover:text-[#F9A136] transition-colors">0{index + 1}</span>
               <span
                 className={`text-3xl font-extralight tracking-wide lowercase transition-transform duration-300 group-hover:translate-x-2 group-hover:text-[#F9A136] ${
                   activeView === item.view ? 'text-[#F9A136] font-[400]' : 'text-[#a3a3a3]'
@@ -133,7 +135,7 @@ export default function Header({ activeView, onNavigate }: HeaderProps) {
         </div>
 
         <div className="mt-auto border-t border-white/5 pt-8 font-mono">
-          <p className="text-[10px] tracking-widest text-[#525252] uppercase mb-4">REPRESENTATION</p>
+          <p className="text-[10px] tracking-widest text-[#8c8c8c] uppercase mb-4">REPRESENTATION</p>
           <p className="text-xs text-white">ADDIS ABABA &bull; EAST AFRICA</p>
           <p className="mt-2 text-[10px] text-neutral-400">mach10media.et@gmail.com</p>
         </div>

@@ -43,8 +43,60 @@ const PAGE_TITLES: Partial<Record<ActiveView, string>> = {
   services: 'Services & Packages — Mach10 Media',
   about: 'About the Studio — Mach10 Media',
   contact: 'Start a Project — Mach10 Media',
-  calculator: 'Rate Estimator — Mach10 Media'
+  calculator: 'Rate Estimator — Mach10 Media',
+  notfound: 'Page Not Found — Mach10 Media'
 };
+
+// Per-view share/preview metadata (og:*, twitter:*) kept alongside page titles.
+const PAGE_META: Partial<Record<ActiveView, { description: string; path: string }>> = {
+  home: {
+    description: 'Media, marketing, and production team in Addis Ababa creating brand identities, commercial photography, film, and social campaigns for ambitious brands.',
+    path: '/'
+  },
+  work: {
+    description: 'Selected campaigns, films, and brand systems from the Mach10 Media archive.',
+    path: '/work'
+  },
+  services: {
+    description: 'Branding, film production, photography, and social campaign packages by Mach10 Media.',
+    path: '/services'
+  },
+  about: {
+    description: 'The studio behind Mach10 Media — creative direction from Addis Ababa, Ethiopia.',
+    path: '/about'
+  },
+  contact: {
+    description: 'Start a project with Mach10 Media — briefs, discovery calls, and inquiries.',
+    path: '/contact'
+  },
+  calculator: {
+    description: 'Estimate a monthly content retainer with Mach10 Media’s rate estimator.',
+    path: '/rates'
+  }
+};
+
+const SITE_URL = 'https://mach10media.et';
+
+function setPageMeta(view: ActiveView) {
+  document.title = PAGE_TITLES[view] || PAGE_TITLES.home as string;
+
+  const meta = PAGE_META[view] ?? PAGE_META.home;
+  const setOrCreate = (attr: 'name' | 'property', key: string, content: string) => {
+    let tag = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+    if (!tag) {
+      tag = document.createElement('meta');
+      tag.setAttribute(attr, key);
+      document.head.appendChild(tag);
+    }
+    tag.setAttribute('content', content);
+  };
+
+  setOrCreate('property', 'og:title', document.title);
+  setOrCreate('property', 'og:description', meta.description);
+  setOrCreate('property', 'og:url', SITE_URL + meta.path);
+  setOrCreate('name', 'twitter:title', document.title);
+  setOrCreate('name', 'twitter:description', meta.description);
+}
 
 function parseLocation(pathname: string): { view: ActiveView; alias: string | null } {
   const path = pathname.replace(/\/+$/, '') || '/';
@@ -53,6 +105,8 @@ function parseLocation(pathname: string): { view: ActiveView; alias: string | nu
     if (alias) return { view: 'project', alias };
   }
   switch (path) {
+    case '/':
+      return { view: 'home', alias: null };
     case '/work':
       return { view: 'work', alias: null };
     case '/services':
@@ -64,7 +118,9 @@ function parseLocation(pathname: string): { view: ActiveView; alias: string | nu
     case '/rates':
       return { view: 'calculator', alias: null };
     default:
-      return { view: 'home', alias: null };
+      // Unknown paths get a real 404 instead of silently posing as home
+      // (duplicates like '/home' also land here, which is correct).
+      return { view: 'notfound', alias: null };
   }
 }
 
@@ -125,10 +181,19 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Per-view document titles (project titles handled below)
+  // Per-view document titles + share metadata (project titles handled below)
   useEffect(() => {
     if (activeView === 'project') return;
-    document.title = PAGE_TITLES[activeView] || PAGE_TITLES.home as string;
+    setPageMeta(activeView);
+
+    // Keep the 404 page out of search indexes; every other view is indexable.
+    let robots = document.head.querySelector<HTMLMetaElement>('meta[name="robots"]');
+    if (!robots) {
+      robots = document.createElement('meta');
+      robots.setAttribute('name', 'robots');
+      document.head.appendChild(robots);
+    }
+    robots.setAttribute('content', activeView === 'notfound' ? 'noindex' : 'index, follow');
   }, [activeView]);
 
   // Safety automatic dismissal of the loading screen after 8 seconds max
@@ -438,6 +503,26 @@ export default function App() {
         return <AboutView />;
       case 'calculator':
         return <CalculatorView />;
+      case 'notfound':
+        return (
+          <div className="flex min-h-screen flex-col items-center justify-center bg-black px-6 text-center text-white">
+            <p className="mb-3 font-mono text-[11px] tracking-[0.28em] text-[#F9A136] uppercase">
+              404 — Signal Lost
+            </p>
+            <h1 className="font-sans text-4xl font-extralight tracking-tighter uppercase sm:text-6xl">
+              This reel doesn’t <span className="font-semibold">exist</span>
+            </h1>
+            <p className="mt-4 max-w-md font-sans text-sm font-light leading-relaxed text-neutral-400">
+              The page you’re looking for was moved, decommissioned, or never produced.
+            </p>
+            <button
+              onClick={() => { navigate('home'); window.scrollTo(0, 0); }}
+              className="mt-8 border border-white/15 px-6 py-3 font-mono text-[10px] tracking-[0.2em] uppercase transition-all hover:bg-white hover:text-black"
+            >
+              Return to Studio
+            </button>
+          </div>
+        );
       case 'contact':
         return (
           <ContactView
@@ -595,7 +680,7 @@ export default function App() {
                 </div>
 
                 <div className="space-y-4">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#6b6b6b]">Navigate</p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#8c8c8c]">Navigate</p>
                   <div className="grid gap-2">
                     {[
                       { label: 'Exhibits Archives', view: 'work' as const },
@@ -615,7 +700,7 @@ export default function App() {
                 </div>
 
                 <div className="space-y-4">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#6b6b6b]">Contact</p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#8c8c8c]">Contact</p>
                   <div className="rounded-2xl border border-white/6 bg-white/[0.02] p-4">
                     <p className="font-sans text-sm leading-relaxed text-neutral-300 md:text-[15px]">
                       Inquiries regarding campaigns, brand work, and production commissions can be sent directly to our Addis Ababa team.

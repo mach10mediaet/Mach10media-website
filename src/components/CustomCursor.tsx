@@ -104,6 +104,7 @@ export default function CustomCursor() {
       {/* Target center dot */}
       <div
         ref={cursorRef}
+        id="custom-cursor-dot"
         className="pointer-events-none fixed top-0 left-0 z-50 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white mix-blend-difference transition-transform duration-100"
         style={{
           transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${clicked ? 0.6 : 1})`

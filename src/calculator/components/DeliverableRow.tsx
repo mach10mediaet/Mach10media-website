@@ -62,7 +62,7 @@ export const DeliverableRow: React.FC<DeliverableRowProps> = ({
         <div className="flex items-start gap-4 min-w-0">
           <span
             className={`pt-0.5 font-mono text-xs transition-colors ${
-              clampedValue > 0 ? 'text-[#F9A136]' : 'text-[#525252]'
+              clampedValue > 0 ? 'text-[#F9A136]' : 'text-[#8c8c8c]'
             }`}
           >
             {num}
@@ -73,7 +73,7 @@ export const DeliverableRow: React.FC<DeliverableRowProps> = ({
                 htmlFor={`input-${id}`}
                 className={`font-sans text-sm font-medium tracking-tight transition-colors sm:text-base ${
                   isDisabled
-                    ? 'text-[#737373] cursor-not-allowed'
+                    ? 'text-[#a3a3a3] cursor-not-allowed'
                     : 'text-[#f2f2f2] group-hover:text-white cursor-pointer'
                 }`}
               >

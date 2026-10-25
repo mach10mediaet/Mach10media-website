@@ -30,7 +30,7 @@ export function SectionHeader({ title, subtitle, actions }: { title: string; sub
       <div>
         <h1 className="font-sans text-2xl font-light text-white">{title}</h1>
         {subtitle && (
-          <p className="font-mono text-[9px] text-[#525252] tracking-wider uppercase mt-1">{subtitle}</p>
+          <p className="font-mono text-[9px] text-[#8c8c8c] tracking-wider uppercase mt-1">{subtitle}</p>
         )}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}

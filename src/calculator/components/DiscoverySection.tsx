@@ -39,7 +39,7 @@ export const DiscoverySection: React.FC<DiscoverySectionProps> = ({
           <span className="mr-2.5 font-mono text-xs text-[#F9A136]">01</span>
           Brand Profile
         </h2>
-        <span className="font-mono text-[10px] tracking-[0.16em] text-[#6b6b6b] uppercase">
+        <span className="font-mono text-[10px] tracking-[0.16em] text-[#8c8c8c] uppercase">
           Client &amp; Production Tier
         </span>
       </div>
@@ -58,7 +58,7 @@ export const DiscoverySection: React.FC<DiscoverySectionProps> = ({
           value={clientName}
           onChange={(e) => onClientNameChange(e.target.value)}
           placeholder="Enter brand name (e.g. RakaCars, Olive & Bread)..."
-          className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 font-sans text-sm text-white placeholder:text-[#525252] transition-colors focus:border-[#F9A136] focus:outline-none sm:text-base"
+          className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 font-sans text-sm text-white placeholder:text-[#8c8c8c] transition-colors focus:border-[#F9A136] focus:outline-none sm:text-base"
         />
       </div>
 

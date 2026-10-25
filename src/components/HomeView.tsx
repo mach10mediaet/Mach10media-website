@@ -276,6 +276,7 @@ Our work is built around clean execution, intentional design, and content that f
                 onClick={toggleMute}
                 className="flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-6 py-3.5 font-mono text-xs tracking-widest text-[#f2f2f2] uppercase transition-all duration-500 hover:scale-105 hover:border-[#F9A136]/40 hover:bg-[#F9A136]/10 hover:text-[#F9A136]"
                 id="hero-audio-mute-button"
+                aria-pressed={!isMuted}
               >
                 <Volume2 className={`h-3 w-3 ${isMuted ? 'opacity-40' : 'text-[#F9A136] animate-pulse'}`} />
                 <span>{isMuted ? 'Unmute Reel' : 'Mute Reel'}</span>
@@ -456,7 +457,7 @@ Our work is built around clean execution, intentional design, and content that f
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start">
-                      <span className="font-mono text-xs text-[#525252] mr-8 pt-1.5 group-hover:text-[#F9A136] transition-colors">{ser.num}</span>
+                      <span className="font-mono text-xs text-[#8c8c8c] mr-8 pt-1.5 group-hover:text-[#F9A136] transition-colors">{ser.num}</span>
                       <div>
                         <h3 className="font-sans text-xl font-normal text-[#a3a3a3] transition-colors duration-500 group-hover:text-[#F9A136] md:text-2xl uppercase tracking-tight">
                           {ser.title}
@@ -468,7 +469,7 @@ Our work is built around clean execution, intentional design, and content that f
                         </p>
                       </div>
                     </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-[#737373] transition-all duration-500 group-hover:border-[#F9A136] group-hover:text-[#F9A136] group-hover:scale-105">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-[#a3a3a3] transition-all duration-500 group-hover:border-[#F9A136] group-hover:text-[#F9A136] group-hover:scale-105">
                       <ArrowUpRight className="h-3.5 w-3.5" />
                     </div>
                   </div>
@@ -524,7 +525,7 @@ Our work is built around clean execution, intentional design, and content that f
         className="border-t border-white/5 bg-[#090909]/40 py-24 md:py-32 mt-12 md:mt-16"
       >
         <div className="mx-auto max-w-5xl px-6 text-center md:px-12">
-          <Quote className="mx-auto h-7 w-7 text-[#737373] mb-10 opacity-70" />
+          <Quote className="mx-auto h-7 w-7 text-[#a3a3a3] mb-10 opacity-70" />
           
           <div className="min-h-[180px] flex items-center justify-center">
             <AnimatePresence mode="wait">
@@ -562,7 +563,7 @@ Our work is built around clean execution, intentional design, and content that f
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="font-mono text-xs text-[#525252] tracking-widest">
+            <span className="font-mono text-xs text-[#8c8c8c] tracking-widest">
               {String(currentTestimonial + 1).padStart(2, '0')} &mdash; {String(testimonials.length).padStart(2, '0')}
             </span>
             <button
@@ -579,7 +580,7 @@ Our work is built around clean execution, intentional design, and content that f
       {/* SECTION 6 — INSTAGRAM PRESENCE */}
       <section id="instagram-section" className="border-t border-white/5 bg-[#090909]/40 py-20 md:py-24">
         <div className="mx-auto max-w-6xl px-6 md:px-12 text-center">
-          <p className="font-mono text-[11px] tracking-[0.3em] text-[#737373] uppercase mb-4">LATEST ON SOCIAL</p>
+          <p className="font-mono text-[11px] tracking-[0.3em] text-[#a3a3a3] uppercase mb-4">LATEST ON SOCIAL</p>
           <h2 className="font-sans text-3xl font-extralight tracking-tight text-white uppercase">
             The work, <span className="webkit-stroke font-black opacity-80">unfiltered</span>
           </h2>

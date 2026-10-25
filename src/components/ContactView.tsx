@@ -301,7 +301,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
     <div className="bg-transparent min-h-screen text-[#f2f2f2] pt-36 pb-24 px-6 md:px-12">
       <div className="mx-auto max-w-7xl">
         <div className="mb-20 border-b border-white/5 pb-10">
-          <div className="flex items-center space-x-2 mb-4 text-[#737373] font-mono text-[11px] tracking-[0.24em] uppercase">
+          <div className="flex items-center space-x-2 mb-4 text-[#a3a3a3] font-mono text-[11px] tracking-[0.24em] uppercase">
             <Sparkles className="h-3 w-3 animate-pulse" />
             <span>PROJECT INQUIRY</span>
           </div>
@@ -348,7 +348,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
 
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div className="border-b border-white/10 py-2.5 transition-all focus-within:border-white">
-                      <label className="mb-1 block font-mono text-[13px] tracking-widest text-[#737373] uppercase">YOUR NAME *</label>
+                      <label className="mb-1 block font-mono text-[13px] tracking-widest text-[#a3a3a3] uppercase">YOUR NAME *</label>
                       <input
                         type="text"
                         required
@@ -361,7 +361,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                     </div>
 
                     <div className="border-b border-white/10 py-2.5 transition-all focus-within:border-white">
-                      <label className="mb-1 block font-mono text-[13px] tracking-widest text-[#737373] uppercase">YOUR EMAIL *</label>
+                      <label className="mb-1 block font-mono text-[13px] tracking-widest text-[#a3a3a3] uppercase">YOUR EMAIL *</label>
                       <input
                         type="email"
                         required
@@ -375,7 +375,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                   </div>
 
                   <div className="border-b border-white/10 py-2.5 transition-all focus-within:border-white">
-                    <label className="mb-1 block font-mono text-[13px] tracking-widest text-[#737373] uppercase">COMPANY OR BRAND</label>
+                    <label className="mb-1 block font-mono text-[13px] tracking-widest text-[#a3a3a3] uppercase">COMPANY OR BRAND</label>
                     <input
                       type="text"
                       placeholder="e.g. Chronos Horlogerie"
@@ -386,7 +386,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                   </div>
 
                   <div>
-                    <label className="mb-3 block text-left font-mono text-[12px] tracking-widest text-[#737373] uppercase">HOW DID YOU HEAR ABOUT US?</label>
+                    <label className="mb-3 block text-left font-mono text-[12px] tracking-widest text-[#a3a3a3] uppercase">HOW DID YOU HEAR ABOUT US?</label>
                     <div className="flex flex-wrap gap-2">
                       {referralSources.map((source) => (
                         <button
@@ -402,7 +402,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                   </div>
 
                   <div>
-                    <label className="mb-3 block text-left font-mono text-[12px] tracking-widest text-[#737373] uppercase">WHAT WOULD YOU LIKE TO DO?</label>
+                    <label className="mb-3 block text-left font-mono text-[12px] tracking-widest text-[#a3a3a3] uppercase">WHAT WOULD YOU LIKE TO DO?</label>
                     <div className="flex flex-wrap gap-2">
                       {nextSteps.map((item) => (
                         <button
@@ -422,7 +422,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                       <p className="font-mono text-[10px] tracking-[0.22em] text-[#F9A136] uppercase mb-4">DISCOVERY CALL REQUEST</p>
                       <div className="grid gap-6 lg:grid-cols-2">
                         <div>
-                          <label className="mb-3 block font-mono text-[11px] tracking-widest text-[#737373] uppercase">CALL TYPE</label>
+                          <label className="mb-3 block font-mono text-[11px] tracking-widest text-[#a3a3a3] uppercase">CALL TYPE</label>
                           <div className="flex flex-wrap gap-2">
                             {callTypes.map((item) => (
                               <button
@@ -438,7 +438,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                         </div>
 
                         <div>
-                          <label className="mb-3 block font-mono text-[11px] tracking-widest text-[#737373] uppercase">BEST TIME WINDOW</label>
+                          <label className="mb-3 block font-mono text-[11px] tracking-widest text-[#a3a3a3] uppercase">BEST TIME WINDOW</label>
                           <div className="flex flex-wrap gap-2">
                             {meetingDays.map((item) => (
                               <button
@@ -459,7 +459,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                   {shouldShowBriefFields && (
                     <>
                       <div>
-                        <label className="mb-3 block text-left font-mono text-[12px] tracking-widest text-[#737373] uppercase">PROJECT TYPE</label>
+                        <label className="mb-3 block text-left font-mono text-[12px] tracking-widest text-[#a3a3a3] uppercase">PROJECT TYPE</label>
                         <div className="flex flex-wrap gap-2">
                           {practices.map((practice) => (
                             <button
@@ -476,7 +476,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
 
                       <div className="grid gap-8 lg:grid-cols-2">
                         <div>
-                          <label className="mb-3 block text-left font-mono text-[12px] tracking-widest text-[#737373] uppercase">MAIN GOAL</label>
+                          <label className="mb-3 block text-left font-mono text-[12px] tracking-widest text-[#a3a3a3] uppercase">MAIN GOAL</label>
                           <div className="flex flex-wrap gap-2">
                             {goals.map((goal) => (
                               <button
@@ -492,7 +492,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                         </div>
 
                         <div>
-                          <label className="mb-3 block text-left font-mono text-[12px] tracking-widest text-[#737373] uppercase">NEEDED DELIVERABLES</label>
+                          <label className="mb-3 block text-left font-mono text-[12px] tracking-widest text-[#a3a3a3] uppercase">NEEDED DELIVERABLES</label>
                           <div className="flex flex-wrap gap-2">
                             {deliverableOptions.map((item) => (
                               <button
@@ -509,7 +509,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                       </div>
 
                       <div>
-                        <label className="mb-3 block text-left font-mono text-[12px] tracking-widest text-[#737373] uppercase">WHERE WILL THE CONTENT BE USED?</label>
+                        <label className="mb-3 block text-left font-mono text-[12px] tracking-widest text-[#a3a3a3] uppercase">WHERE WILL THE CONTENT BE USED?</label>
                         <div className="flex flex-wrap gap-2">
                           {platforms.map((item) => (
                             <button
@@ -527,7 +527,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                       <div>
                         <div className="flex flex-col gap-4">
                           <div className="flex flex-wrap items-center justify-between gap-3">
-                            <label className="block text-left font-mono text-[12px] tracking-widest text-[#737373] uppercase">PROJECT BUDGET</label>
+                            <label className="block text-left font-mono text-[12px] tracking-widest text-[#a3a3a3] uppercase">PROJECT BUDGET</label>
                             <div className="flex flex-wrap items-center gap-3">
                               <div className="inline-flex rounded-full border border-white/10 bg-white/[0.05] p-1 shadow-[0_12px_30px_rgba(0,0,0,0.18)] backdrop-blur-md">
                                 {(['USD', 'ETB'] as Currency[]).map((option) => (
@@ -563,7 +563,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
 
                           {pricingMode === 'exact' ? (
                             <div className="border border-white/5 bg-[#0c0c0c]/50 p-5 sm:p-6">
-                              <label className="mb-3 block font-mono text-[11px] tracking-widest text-[#737373] uppercase">
+                              <label className="mb-3 block font-mono text-[11px] tracking-widest text-[#a3a3a3] uppercase">
                                 EXACT BUDGET
                               </label>
                               <div className="flex items-center gap-3 border-b border-white/10 py-2.5 transition-all focus-within:border-white">
@@ -600,7 +600,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                       </div>
 
                       <div className="border-b border-white/10 py-2.5 transition-all focus-within:border-white">
-                        <label className="mb-2 block font-mono text-[13px] tracking-widest text-[#737373] uppercase">PROJECT DETAILS</label>
+                        <label className="mb-2 block font-mono text-[13px] tracking-widest text-[#a3a3a3] uppercase">PROJECT DETAILS</label>
                         <textarea
                           rows={5}
                           placeholder="Tell us about the project, launch, creative direction, or anything else that would help."
@@ -631,7 +631,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                   id="contact-success-state"
                 >
                   <div className="border border-white/5 p-8">
-                    <p className="mb-4 font-mono text-[9px] tracking-[0.3em] text-[#737373] uppercase">TRANSMISSION ESTABLISHED</p>
+                    <p className="mb-4 font-mono text-[9px] tracking-[0.3em] text-[#a3a3a3] uppercase">TRANSMISSION ESTABLISHED</p>
                     <h3 className="mb-6 font-sans text-3xl font-extralight tracking-tight text-white">
                       We got your request.
                     </h3>
@@ -694,20 +694,20 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
             )}
 
             <div>
-              <p className="font-mono text-[12px] tracking-[0.3em] text-[#525252] uppercase mb-6">OUR OFFICE</p>
+              <p className="font-mono text-[12px] tracking-[0.3em] text-[#8c8c8c] uppercase mb-6">OUR OFFICE</p>
               
               <div className="space-y-8">
                 {offices.map((office, index) => (
                   <div key={index} className="border-l border-white/10 pl-5 py-1">
                     <h4 className="font-sans text-base font-normal text-white flex items-center gap-1.5 uppercase tracking-tight">
-                      <MapPin className="h-3.5 w-3.5 text-[#525252]" />
+                      <MapPin className="h-3.5 w-3.5 text-[#8c8c8c]" />
                       <span>{office.city}</span>
                     </h4>
-                    <p className="font-sans text-[15px] text-[#737373] mt-0.5">{office.desc}</p>
+                    <p className="font-sans text-[15px] text-[#a3a3a3] mt-0.5">{office.desc}</p>
                     <p className="font-sans text-[#a3a3a3] font-light text-sm mt-2 leading-relaxed">
                       {office.address}
                     </p>
-                    <div className="mt-2.5 flex flex-col space-y-1 font-mono text-[15px] text-[#737373]">
+                    <div className="mt-2.5 flex flex-col space-y-1 font-mono text-[15px] text-[#a3a3a3]">
                       <a href={`mailto:${office.email}`} className="flex items-center gap-1.5 hover:text-[#F9A136] transition-colors">
                         <Mail className="h-3 w-3" />
                         <span>{office.email}</span>

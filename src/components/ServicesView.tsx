@@ -48,7 +48,7 @@ export default function ServicesView({ onNavigateToContact }: ServicesViewProps)
     <div className="bg-transparent min-h-screen text-[#f2f2f2] pt-36 pb-24 px-6 md:px-12">
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 border-b border-white/5 pb-10">
-          <div className="flex items-center space-x-2.5 mb-4 text-[#737373] font-mono text-[12px] tracking-[0.3em] uppercase">
+          <div className="flex items-center space-x-2.5 mb-4 text-[#a3a3a3] font-mono text-[12px] tracking-[0.3em] uppercase">
             <Sparkles className="h-3 w-3 animate-pulse" />
             <span>THE SERVICE LEDGER</span>
           </div>
@@ -71,7 +71,7 @@ export default function ServicesView({ onNavigateToContact }: ServicesViewProps)
               >
                 <div className="mb-6 flex items-start justify-between gap-4">
                   <div>
-                    <p className="mb-3 font-mono text-[10px] tracking-[0.2em] text-[#737373] uppercase">
+                    <p className="mb-3 font-mono text-[10px] tracking-[0.2em] text-[#a3a3a3] uppercase">
                       {service.eyebrow}
                     </p>
                     <h2 className="font-sans text-2xl font-light tracking-tight text-white uppercase sm:text-3xl">
@@ -125,7 +125,7 @@ export default function ServicesView({ onNavigateToContact }: ServicesViewProps)
 
         <section className="mb-20 border-y border-white/5 py-20 bg-[#0c0c0c]/20">
           <div className="mb-10">
-            <p className="font-mono text-[12px] tracking-[0.3em] text-[#737373] uppercase mb-4">HOW WE WORK</p>
+            <p className="font-mono text-[12px] tracking-[0.3em] text-[#a3a3a3] uppercase mb-4">HOW WE WORK</p>
             <h3 className="font-sans text-3xl font-light tracking-tight text-white uppercase">
               a simple process
             </h3>

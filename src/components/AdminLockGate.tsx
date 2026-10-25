@@ -39,7 +39,7 @@ export default function AdminLockGate({ onAuthenticate, onClose }: AdminLockGate
           <h1 className="font-sans text-2xl font-extralight tracking-tight text-white mt-1">
             Studio Keyhole Access
           </h1>
-          <p className="font-mono text-[9px] text-[#737373] tracking-[0.15em] uppercase">
+          <p className="font-mono text-[9px] text-[#a3a3a3] tracking-[0.15em] uppercase">
             TEAM &amp; ADMIN ACCESS &bull; AUTH REQUIRED
           </p>
         </div>

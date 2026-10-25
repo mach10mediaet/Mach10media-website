@@ -33,7 +33,7 @@ export default function WorkView({ projects, onNavigateToProject }: WorkViewProp
         
         {/* Header Block */}
         <div className="mb-16 border-b border-white/5 pb-10">
-          <div className="flex items-center space-x-2.5 mb-4 text-[#737373] font-mono text-[12px] tracking-[0.3em] uppercase">
+          <div className="flex items-center space-x-2.5 mb-4 text-[#a3a3a3] font-mono text-[12px] tracking-[0.3em] uppercase">
             <Sparkles className="h-3 w-3 animate-pulse" />
             <span>THE ARCHIVAL COMPENDIUM</span>
           </div>
@@ -80,7 +80,7 @@ export default function WorkView({ projects, onNavigateToProject }: WorkViewProp
             >
               <AlertCircle className="h-8 w-8 text-neutral-600 mb-4" />
               <p className="font-sans text-sm font-light text-neutral-300">No published portfolio records are live yet.</p>
-              <p className="font-mono text-[10px] text-[#525252] mt-2 uppercase tracking-widest">Publish projects from studio admin</p>
+              <p className="font-mono text-[10px] text-[#8c8c8c] mt-2 uppercase tracking-widest">Publish projects from studio admin</p>
             </motion.div>
           ) : filteredProjects.length === 0 ? (
             <motion.div
@@ -91,7 +91,7 @@ export default function WorkView({ projects, onNavigateToProject }: WorkViewProp
             >
               <AlertCircle className="h-8 w-8 text-neutral-600 mb-4" />
               <p className="font-sans text-sm font-light text-neutral-300">No live exhibits match this filter yet.</p>
-              <p className="font-mono text-[10px] text-[#525252] mt-2 uppercase tracking-widest">Try another practice</p>
+              <p className="font-mono text-[10px] text-[#8c8c8c] mt-2 uppercase tracking-widest">Try another practice</p>
             </motion.div>
           ) : (
             <motion.div

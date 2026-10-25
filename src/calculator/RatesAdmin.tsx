@@ -195,7 +195,7 @@ export default function RatesAdmin({ onNotice }: RatesAdminProps) {
           <div className="mb-3 flex items-center gap-2.5 font-mono text-[11px] tracking-[0.28em] text-[#F9A136] uppercase">
             <span className="h-2 w-2 rounded-full bg-[#F9A136]" aria-hidden="true" />
             <span>Studio Rate Architecture</span>
-            <span className="text-[#6b6b6b]">
+            <span className="text-[#8c8c8c]">
               {loaded ? '· Live rates synced' : '· Syncing rates…'}
             </span>
           </div>
@@ -252,7 +252,7 @@ export default function RatesAdmin({ onNotice }: RatesAdminProps) {
               type="button"
               onClick={() => setActiveTab(tab.key)}
               className={`relative pb-4 font-mono text-xs tracking-[0.22em] uppercase transition-colors duration-300 cursor-pointer ${
-                isCurrent ? 'text-white' : 'text-[#737373] hover:text-[#f2f2f2]'
+                isCurrent ? 'text-white' : 'text-[#a3a3a3] hover:text-[#f2f2f2]'
               }`}
             >
               {tab.label}

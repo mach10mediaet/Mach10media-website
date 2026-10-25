@@ -106,7 +106,7 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
               </button>
             </div>
           ) : (
-            <div className="font-mono text-[9px] tracking-[0.2em] text-[#525252] uppercase hidden sm:block">
+            <div className="font-mono text-[9px] tracking-[0.2em] text-[#8c8c8c] uppercase hidden sm:block">
               ARCHIVE ENTRY ID: {project.id} &bull; CLIENT: {project.client.split(' ')[0]}
             </div>
           )}
@@ -146,7 +146,7 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
           <section className="mb-24 border border-white/5 bg-[#0c0c0c]/40 p-10 backdrop-blur-md grid gap-8 sm:grid-cols-3">
             {project.stats.map((stat, i) => (
               <div key={i} className="text-center sm:text-left border-b sm:border-b-0 sm:border-r border-white/10 last:border-0 pb-6 sm:pb-0 sm:pr-8 last:pr-0">
-                <p className="font-mono text-[9px] tracking-[0.3em] text-[#737373] uppercase mb-2">{stat.label}</p>
+                <p className="font-mono text-[9px] tracking-[0.3em] text-[#a3a3a3] uppercase mb-2">{stat.label}</p>
                 <p className="font-sans text-3xl font-extralight tracking-tighter text-white md:text-4xl uppercase">{stat.value}</p>
               </div>
             ))}
@@ -157,7 +157,7 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
           <div className="md:col-span-4 flex flex-col justify-start">
             <div className="border border-white/10 px-6 py-8 inline-block select-none text-center bg-[#0c0c0c]/60 mb-8 max-w-[240px]">
               <span className="font-sans text-xl font-black tracking-[0.3em] text-white">{project.client.toUpperCase()}</span>
-              <p className="font-mono text-[8px] tracking-widest text-[#525252] uppercase mt-2">REPRESENTATION EMBLEM</p>
+              <p className="font-mono text-[8px] tracking-widest text-[#8c8c8c] uppercase mt-2">REPRESENTATION EMBLEM</p>
             </div>
 
             <div className="font-mono text-xs text-neutral-400 space-y-4">
@@ -190,7 +190,7 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
           </div>
 
           <div className="md:col-span-8">
-            <p className="font-mono text-[10px] tracking-[0.3em] text-[#737373] uppercase mb-4">THE CONCEPT STORY</p>
+            <p className="font-mono text-[10px] tracking-[0.3em] text-[#a3a3a3] uppercase mb-4">THE CONCEPT STORY</p>
             <h2 className="font-sans text-xl font-light text-neutral-300 leading-relaxed max-w-2xl">{project.description}</h2>
 
             <p className="mt-8 font-sans text-sm font-light leading-relaxed text-[#8c8c8c] max-w-3xl border-l border-white/15 pl-6 py-2.5">
@@ -201,7 +201,7 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
 
         {(embeddedVideoUrl || directVideoUrl) && (
           <section className="mb-28">
-            <p className="font-mono text-[10px] tracking-[0.3em] text-[#737373] uppercase mb-6">VIDEO RUNNER PRESENTATION</p>
+            <p className="font-mono text-[10px] tracking-[0.3em] text-[#a3a3a3] uppercase mb-6">VIDEO RUNNER PRESENTATION</p>
 
             <div className="relative aspect-video w-full overflow-hidden bg-neutral-950 border border-white/10 p-2 group">
               <div className="w-full h-full overflow-hidden relative">
@@ -253,7 +253,7 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
 
         {project.gallery && project.gallery.length > 0 && (
           <section className="mb-28">
-            <p className="font-mono text-[10px] tracking-[0.3em] text-[#737373] uppercase mb-8">CAMPAIGN LOOK DESIGN EXPOSURES</p>
+            <p className="font-mono text-[10px] tracking-[0.3em] text-[#a3a3a3] uppercase mb-8">CAMPAIGN LOOK DESIGN EXPOSURES</p>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {project.gallery.map((asset, i) => (
@@ -288,12 +288,12 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
 
         {project.credits && project.credits.length > 0 && (
           <section className="mb-28 border-t border-white/5 pt-16">
-            <p className="font-mono text-[10px] tracking-[0.3em] text-[#737373] uppercase mb-8">EXHIBIT REPRESENTATIVE CREDITS</p>
+            <p className="font-mono text-[10px] tracking-[0.3em] text-[#a3a3a3] uppercase mb-8">EXHIBIT REPRESENTATIVE CREDITS</p>
 
             <div className="grid gap-8 grid-cols-2 lg:grid-cols-4">
               {project.credits.map((cr, i) => (
                 <div key={i} className="border-l border-white/10 pl-6 py-2 group hover:border-[#F9A136]/60 transition-all">
-                  <p className="font-mono text-[8.5px] tracking-[0.2em] text-[#525252] group-hover:text-[#F9A136] uppercase mb-1 transition-colors">{cr.role}</p>
+                  <p className="font-mono text-[8.5px] tracking-[0.2em] text-[#8c8c8c] group-hover:text-[#F9A136] uppercase mb-1 transition-colors">{cr.role}</p>
                   <p className="font-sans text-sm text-neutral-300 group-hover:text-white transition-colors">{cr.name}</p>
                 </div>
               ))}
@@ -303,7 +303,7 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
 
         {relatedProjects.length > 0 && (
           <section className="mb-28 border-t border-white/5 pt-16">
-            <p className="font-mono text-[10px] tracking-[0.3em] text-[#525252] uppercase mb-8">
+            <p className="font-mono text-[10px] tracking-[0.3em] text-[#8c8c8c] uppercase mb-8">
               MORE FROM {project.category.toUpperCase()}
             </p>
             <div className="grid gap-6 sm:grid-cols-3">
@@ -326,7 +326,7 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
                     />
                   </div>
                   <div className="px-1.5 py-3">
-                    <p className="font-mono text-[8.5px] tracking-widest text-[#525252] uppercase">{related.client} &bull; {related.year}</p>
+                    <p className="font-mono text-[8.5px] tracking-widest text-[#8c8c8c] uppercase">{related.client} &bull; {related.year}</p>
                     <h4 className="font-sans text-sm font-medium text-white group-hover:text-[#F9A136] transition-colors truncate mt-1 uppercase">
                       {related.title}
                     </h4>
@@ -338,16 +338,16 @@ export default function ProjectTemplateView({ project, allProjects, onBack, onNa
         )}
 
         <section className="border-t border-white/5 pt-16 text-center">
-          <p className="font-mono text-[10px] tracking-[0.3em] text-[#525252] uppercase mb-4">CONTINUOUS IMMERSION</p>
+          <p className="font-mono text-[10px] tracking-[0.3em] text-[#8c8c8c] uppercase mb-4">CONTINUOUS IMMERSION</p>
           <div
             onClick={handleNextProjectClick}
             className="group cursor-pointer max-w-2xl mx-auto py-12 px-6 border border-white/5 bg-[#0a0a0a]/30 hover:bg-[#0c0c0c]/80 hover:border-[#F9A136]/40 transition-all duration-500 rounded-none block"
           >
-            <span className="font-mono text-[9px] text-[#737373] uppercase tracking-widest group-hover:text-[#F9A136] transition-colors">NEXT PROJECT DIRECT</span>
+            <span className="font-mono text-[9px] text-[#a3a3a3] uppercase tracking-widest group-hover:text-[#F9A136] transition-colors">NEXT PROJECT DIRECT</span>
             <h3 className="font-sans text-2xl font-light text-[#949494] group-hover:text-[#F9A136] transition-colors mt-2 tracking-tight uppercase">
               {nextProject.title}
             </h3>
-            <p className="text-[10px] font-mono tracking-[0.25em] text-[#525252] group-hover:text-[#F9A136] uppercase mt-4 flex items-center justify-center gap-1.5 transition-colors">
+            <p className="text-[10px] font-mono tracking-[0.25em] text-[#8c8c8c] group-hover:text-[#F9A136] uppercase mt-4 flex items-center justify-center gap-1.5 transition-colors">
               <span>EXPLORE EXHIBIT</span>
               <ChevronRight className="h-4 w-4 group-hover:translate-x-1.5 transition-transform" />
             </p>

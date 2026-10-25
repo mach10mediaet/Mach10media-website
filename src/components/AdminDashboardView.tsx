@@ -1193,7 +1193,7 @@ export default function AdminDashboardView({
         <aside className="lg:col-span-1 border-b lg:border-b-0 lg:border-r border-white/10 pb-6 lg:pb-0 lg:pr-8">
           <div className="mb-8 flex items-center space-x-2 border-b border-white/10 pb-4">
             <div className="h-2 w-2 rounded-full bg-neutral-400 animate-pulse" />
-            <span className="font-mono text-[9px] tracking-[0.25em] text-[#737373] uppercase">{isWorklogAdmin ? 'MACH10 SECURITY PANEL' : 'MACH10 WORKLOG'}</span>
+            <span className="font-mono text-[9px] tracking-[0.25em] text-[#a3a3a3] uppercase">{isWorklogAdmin ? 'MACH10 SECURITY PANEL' : 'MACH10 WORKLOG'}</span>
           </div>
 
           <div className="space-y-2">
@@ -1250,7 +1250,7 @@ export default function AdminDashboardView({
           </div>
 
           <div className="mt-12 hidden lg:block border-t border-white/10 pt-8">
-            <p className="font-mono text-[8.5px] text-[#525252] uppercase tracking-[0.25em] mb-3">PERSISTENCE STORAGE</p>
+            <p className="font-mono text-[8.5px] text-[#8c8c8c] uppercase tracking-[0.25em] mb-3">PERSISTENCE STORAGE</p>
             <div className="rounded border border-white/10 bg-[#0c0c0c]/80 p-4 text-[10px] text-neutral-400 font-mono space-y-1.5 shadow-sm">
               <p>Type: LIVE FIRESTORE STATE</p>
               <p>Projects Indexed: {projects.length}</p>
@@ -1283,7 +1283,7 @@ export default function AdminDashboardView({
                     setIsAddingNew(false);
                     setEditingProject(null);
                   }}
-                  className="font-mono text-[9px] uppercase tracking-widest text-[#737373] hover:text-white"
+                  className="font-mono text-[9px] uppercase tracking-widest text-[#a3a3a3] hover:text-white"
                   id="form-cancel-btn"
                 >
                   Return to Roster
@@ -1472,7 +1472,7 @@ export default function AdminDashboardView({
                         <ImageIcon className="h-3.5 w-3.5 text-neutral-400" />
                         <span>Client Visual Exhibits Gallery ({formGallery.length})</span>
                       </p>
-                      <p className="text-[9px] font-sans text-[#737373] mt-0.5">Define rich multi-angle photography assets presented inside this client exhibit page.</p>
+                      <p className="text-[9px] font-sans text-[#a3a3a3] mt-0.5">Define rich multi-angle photography assets presented inside this client exhibit page.</p>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -1871,7 +1871,7 @@ export default function AdminDashboardView({
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/5 pb-6">
                 <div>
                   <h1 className="font-sans text-2xl font-light">Exhibits Roster</h1>
-                  <p className="font-mono text-[9px] text-[#525252] tracking-wider uppercase mt-1">Configure and index legacy assets</p>
+                  <p className="font-mono text-[9px] text-[#8c8c8c] tracking-wider uppercase mt-1">Configure and index legacy assets</p>
                 </div>
                 
                 <button
@@ -1910,7 +1910,7 @@ export default function AdminDashboardView({
                     <div className="w-full min-w-0">
                       <p className="font-mono text-[8.5px] uppercase tracking-wider text-neutral-500">{proj.client}</p>
                       <h4 className="font-sans text-sm font-semibold text-white truncate">{proj.title}</h4>
-                      <p className="font-sans text-xs text-[#737373] mt-1 pr-4 truncate italic">"{proj.tagline}"</p>
+                      <p className="font-sans text-xs text-[#a3a3a3] mt-1 pr-4 truncate italic">"{proj.tagline}"</p>
                     </div>
 
                     {/* Manage keys action */}
@@ -1959,7 +1959,7 @@ export default function AdminDashboardView({
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/5 pb-6">
                 <div>
                   <h1 className="font-sans text-2xl font-light">Client Inquiries</h1>
-                  <p className="font-mono text-[9px] text-[#525252] tracking-wider uppercase mt-1">Leads captured from the contact page</p>
+                  <p className="font-mono text-[9px] text-[#8c8c8c] tracking-wider uppercase mt-1">Leads captured from the contact page</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -2076,7 +2076,7 @@ export default function AdminDashboardView({
             <section className="space-y-6">
               <div>
                 <h1 className="font-sans text-2xl font-light">Media Lab Organizer</h1>
-                <p className="font-mono text-[9px] text-[#525252] tracking-wider uppercase mt-1">Secure drag-and-drop ingestion parameters</p>
+                <p className="font-mono text-[9px] text-[#8c8c8c] tracking-wider uppercase mt-1">Secure drag-and-drop ingestion parameters</p>
               </div>
 
               {/* GOOGLE DRIVE INTEGRATION SUITE */}
@@ -2101,7 +2101,7 @@ export default function AdminDashboardView({
                             setDriveToken(null);
                             setAccessToken(null);
                           }}
-                          className="font-mono text-[9px] text-[#737373] hover:text-white uppercase tracking-wider underline cursor-pointer ml-3"
+                          className="font-mono text-[9px] text-[#a3a3a3] hover:text-white uppercase tracking-wider underline cursor-pointer ml-3"
                         >
                           Revoke
                         </button>
@@ -2246,7 +2246,7 @@ export default function AdminDashboardView({
                         Auth mismatch: {driveError}
                       </div>
                     ) : driveFiles.length === 0 ? (
-                      <div className="py-12 border border-dashed border-white/5 rounded text-center text-xs text-[#525252] font-mono uppercase tracking-widest">
+                      <div className="py-12 border border-dashed border-white/5 rounded text-center text-xs text-[#8c8c8c] font-mono uppercase tracking-widest">
                         Zero items matched this folder filter
                       </div>
                     ) : (
@@ -2399,7 +2399,7 @@ export default function AdminDashboardView({
 
               {/* GALLERY ORGANIZATION SHOWCASE */}
               <div>
-                <p className="font-mono text-[9px] tracking-[0.25em] text-[#525252] uppercase mb-4">INGESTION MEDIA BUFFER LIBRARY ({uploadedMediaList.length})</p>
+                <p className="font-mono text-[9px] tracking-[0.25em] text-[#8c8c8c] uppercase mb-4">INGESTION MEDIA BUFFER LIBRARY ({uploadedMediaList.length})</p>
                 
                 <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
                   {uploadedMediaList.map((asset) => (
@@ -2412,9 +2412,9 @@ export default function AdminDashboardView({
                         />
                       ) : (
                         <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-neutral-900 border border-white/10 text-center">
-                          <FileVideo className="h-7 w-7 text-[#737373] mb-2" />
+                          <FileVideo className="h-7 w-7 text-[#a3a3a3] mb-2" />
                           <p className="font-mono text-[8.5px] uppercase tracking-wider text-[#a3a3a3] truncate w-full">{asset.caption || 'Video File'}</p>
-                          <span className="font-mono text-[7px] text-[#525252] mt-1 uppercase">STREAM SNIPPET</span>
+                          <span className="font-mono text-[7px] text-[#8c8c8c] mt-1 uppercase">STREAM SNIPPET</span>
                         </div>
                       )}
 
@@ -2446,7 +2446,7 @@ export default function AdminDashboardView({
             <section className="space-y-8 animate-[fade-in_0.5s_ease-out]">
               <div>
                 <h1 className="font-sans text-2xl font-light">Custom Security & Link Customizer</h1>
-                <p className="font-mono text-[9px] text-[#525252] tracking-wider uppercase mt-1">Configure your custom private entrance parameters and password locker</p>
+                <p className="font-mono text-[9px] text-[#8c8c8c] tracking-wider uppercase mt-1">Configure your custom private entrance parameters and password locker</p>
               </div>
 
               <div className="grid gap-6 md:grid-cols-2">
@@ -2487,7 +2487,7 @@ export default function AdminDashboardView({
                         id="security-slug-input"
                       />
                     </div>
-                    <p className="text-[9px] text-[#737373] font-mono mt-1">Accepts lowercase alphanumeric, hyphens, and underscores. Saves instantly.</p>
+                    <p className="text-[9px] text-[#a3a3a3] font-mono mt-1">Accepts lowercase alphanumeric, hyphens, and underscores. Saves instantly.</p>
                   </div>
                 </div>
 
@@ -2568,7 +2568,7 @@ export default function AdminDashboardView({
                     </div>
                     <h3 className="font-sans text-sm font-semibold text-white">Live Cloud Database Status</h3>
                   </div>
-                  <span className="font-mono text-[9px] text-[#737373] uppercase tracking-[0.2em]">
+                  <span className="font-mono text-[9px] text-[#a3a3a3] uppercase tracking-[0.2em]">
                     V2 Zero-Trust ABAC Guarded
                   </span>
                 </div>

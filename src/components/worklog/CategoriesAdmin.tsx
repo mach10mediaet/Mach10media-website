@@ -205,7 +205,7 @@ export default function CategoriesAdmin({ clients, workTypes, onNotice }: Catego
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/5 pb-6">
         <div>
           <h1 className="font-sans text-2xl font-light text-white">Categories</h1>
-          <p className="font-mono text-[9px] text-[#525252] tracking-wider uppercase mt-1">Clients and work types for time tracking</p>
+          <p className="font-mono text-[9px] text-[#8c8c8c] tracking-wider uppercase mt-1">Clients and work types for time tracking</p>
         </div>
       </div>
       <div className="grid gap-6 lg:grid-cols-2">

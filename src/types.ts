@@ -53,7 +53,7 @@ export interface Project {
   };
 }
 
-export type ActiveView = 'home' | 'work' | 'services' | 'project' | 'about' | 'contact' | 'calculator' | 'admin' | 'upload';
+export type ActiveView = 'home' | 'work' | 'services' | 'project' | 'about' | 'contact' | 'calculator' | 'notfound' | 'admin' | 'upload';
 
 // ── Work-Log (time tracking) ──
 

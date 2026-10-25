@@ -192,7 +192,7 @@ export const StickySummaryCard: React.FC<StickySummaryCardProps> = ({ breakdown 
 
       {/* Active Scope Breakdown */}
       <div className="py-4 space-y-2 border-b border-white/8">
-        <div className="font-mono text-[10px] tracking-[0.2em] text-[#6b6b6b] uppercase mb-2">
+        <div className="font-mono text-[10px] tracking-[0.2em] text-[#8c8c8c] uppercase mb-2">
           Included Scope
         </div>
 
