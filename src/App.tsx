@@ -4,7 +4,7 @@ import CustomCursor from './components/CustomCursor';
 import NoiseOverlay from './components/NoiseOverlay';
 import loadingVideo from './assets/Loading.mp4';
 
-import HomeView from './components/HomeView';
+const HomeView = lazy(() => import('./components/HomeView'));
 const WorkView = lazy(() => import('./components/WorkView'));
 const ServicesView = lazy(() => import('./components/ServicesView'));
 const ProjectTemplateView = lazy(() => import('./components/ProjectTemplateView'));
@@ -16,7 +16,6 @@ const AdminDashboardView = lazy(() => import('./components/AdminDashboardView'))
 const AdminLockGate = lazy(() => import('./components/AdminLockGate'));
 const CalculatorView = lazy(() => import('./calculator/CalculatorView'));
 
-import { INITIAL_PROJECTS } from './data/mockProjects';
 import { Project, ActiveView, AppDiagnosticEvent, MemberProfile, MemberRole } from './types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Analytics } from '@vercel/analytics/react';
@@ -154,7 +153,16 @@ export default function App() {
   const initialRoute = parseLocation(window.location.pathname);
   const [activeView, setActiveView] = useState<ActiveView>(initialRoute.view);
   const [selectedProjectAlias, setSelectedProjectAlias] = useState<string | null>(initialRoute.alias);
-  const [isLoadingScreen, setIsLoadingScreen] = useState<boolean>(true);
+  // The intro film plays once per browser session; reloads land on content.
+  const [isLoadingScreen, setIsLoadingScreen] = useState<boolean>(
+    () => !sessionStorage.getItem('mach10_intro_seen')
+  );
+
+  useEffect(() => {
+    if (!isLoadingScreen) {
+      try { sessionStorage.setItem('mach10_intro_seen', '1'); } catch { /* private mode */ }
+    }
+  }, [isLoadingScreen]);
 
   // Push a clean path for every public navigation; admin/upload stay hash-driven.
   const navigate = (view: ActiveView, alias?: string | null) => {
@@ -355,7 +363,12 @@ export default function App() {
         message: `Projects sync successful (${snapshot.size} records).`
       });
       if (snapshot.empty) {
-        setProjects(import.meta.env.DEV ? INITIAL_PROJECTS : []);
+        // Dev-only seed data, loaded on demand so it stays out of prod bundles.
+        if (import.meta.env.DEV) {
+          import('./data/mockProjects').then((m) => setProjects(m.INITIAL_PROJECTS));
+        } else {
+          setProjects([]);
+        }
       } else {
         const loadedProjects: Project[] = [];
         snapshot.forEach((docSnap) => {

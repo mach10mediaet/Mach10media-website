@@ -8,9 +8,9 @@ import { useSiteSetting } from '../hooks/useSiteSetting';
 
 // Streamed from /public with CDN caching instead of shipping inside the bundle
 const heroVideo = '/hero-reel.mp4';
-import brandIdentityImage from '../assets/brand-identity-and-design-system.jpeg';
-import commercialPhotographyImage from '../assets/commerical-photography.jpeg';
-import foodPhotographyImage from '../assets/food-photography.jpg';
+import brandIdentityImage from '../assets/brand-identity-and-design-system.webp';
+import commercialPhotographyImage from '../assets/commerical-photography.webp';
+import foodPhotographyImage from '../assets/food-photography.webp';
 import servicePlaceholderImage from '../assets/service-placeholder.svg';
 import { isDirectVideoUrl } from '../utils/video';
 
@@ -214,6 +214,7 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
           <video
             ref={videoRef}
             src={heroVideo}
+            poster="/hero-poster.jpg"
             autoPlay
             loop
             muted

@@ -11,6 +11,22 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          // Keep the heavyweight SDKs out of the app chunk so the first
+          // paint only pays for the shell + current view. Function form is
+          // required: the `firebase` umbrella package has no root entry.
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (/[\\/](firebase|@firebase)[\\/]/.test(id)) return 'vendor-firebase';
+              if (/[\\/]node_modules[\\/]motion[\\/]/.test(id) || /[\\/](framer-motion|motion-utils|motion-dom)[\\/]/.test(id)) return 'vendor-motion';
+              if (/[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return 'vendor-react';
+            }
+          },
+        },
+      },
+    },
     server: {
       allowedHosts: ['estimator-upper-sullen.ngrok-free.dev'],
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
