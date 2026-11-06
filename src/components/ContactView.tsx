@@ -138,11 +138,14 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
     goal: 'Launch a campaign' as GoalOption,
     platforms: ['Instagram', 'Website'] as PlatformOption[],
     deliverables: ['Brand Film', 'Launch Assets'] as DeliverableOption[],
-    nextStep: 'Do both' as NextStepOption,
+    // '' = not answered yet. Later steps reveal procedurally (a step appears
+    // only after the step above it has an answer), so the page never loads as
+    // a wall of fields with pre-decided defaults.
+    nextStep: '' as NextStepOption | '',
     callType: 'Zoom Call' as CallTypeOption,
     meetingDay: 'Weekday Afternoon' as MeetingDayOption,
     story: '',
-    referralSource: 'Instagram' as ReferralSourceOption
+    referralSource: '' as ReferralSourceOption | ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -178,6 +181,15 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
   const shouldShowBookingFields = formData.nextStep === 'Book a discovery call' || formData.nextStep === 'Do both';
   const shouldShowBriefFields = formData.nextStep === 'Send project brief only' || formData.nextStep === 'Do both';
 
+  /* Procedural reveal — the form unfolds one answer at a time (01 About You and
+     02 How You Found Us open the page; each later step appears once the step
+     above it is answered). Unlocking is sticky: revising an answer above never
+     re-lock a revealed step. */
+  const revealTransition = { duration: 0.5, ease: [0.22, 1, 0.36, 1] } as const;
+  const revealedSectionProps = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: revealTransition } as const;
+  const referralChosen = formData.referralSource !== '';
+  const nextStepChosen = formData.nextStep !== '';
+
   const offices = [
     {
       city: 'Addis Ababa',
@@ -208,11 +220,11 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
       goal: 'Launch a campaign',
       platforms: ['Instagram', 'Website'],
       deliverables: ['Brand Film', 'Launch Assets'],
-      nextStep: 'Do both',
+      nextStep: '',
       callType: 'Zoom Call',
       meetingDay: 'Weekday Afternoon',
       story: '',
-      referralSource: 'Instagram'
+      referralSource: ''
     });
   };
 
@@ -220,6 +232,12 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
     e.preventDefault();
     if (!formData.name || !formData.email) {
       alert('Please complete the mandatory Name and Email lines.');
+      return;
+    }
+    // Normal flow never reaches submit before steps 02/03 are answered (they
+    // reveal the rest); guarded anyway so the payload never stores placeholders.
+    if (!formData.referralSource || !formData.nextStep) {
+      alert('Please pick how you found us and how you would like to proceed.');
       return;
     }
 
@@ -418,8 +436,12 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                     </div>
                   </section>
 
-                  {/* 03 — How to Proceed */}
-                  <section>
+                  {/* 03 — How to Proceed (reveals once step 02 is answered) */}
+                  {referralChosen && (
+                  <motion.section
+                    {...revealedSectionProps}
+                    aria-label="How to proceed"
+                  >
                     <SectionHeader num="03" label="How to Proceed" />
                     <div className="flex flex-wrap gap-2">
                       {nextSteps.map((item) => (
@@ -472,11 +494,15 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                         </div>
                       </div>
                     )}
-                  </section>
+                  </motion.section>
+                  )}
 
-                  {/* 04 — The Brief */}
-                  {shouldShowBriefFields && (
-                    <section>
+                  {/* 04 — The Brief (reveals once a brief-inclusive step 03 choice is made) */}
+                  {nextStepChosen && shouldShowBriefFields && (
+                  <motion.section
+                    {...revealedSectionProps}
+                    aria-label="The brief"
+                  >
                       <SectionHeader num="04" label="The Brief" />
 
                       <div>
@@ -625,10 +651,11 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                           className="w-full resize-none border-0 bg-transparent p-0 text-base font-light text-white placeholder:text-[#333] focus:outline-none"
                         />
                       </div>
-                    </section>
+                  </motion.section>
                   )}
 
-                  {/* Submit — primary CTA */}
+                  {/* Submit — primary CTA (reveals once step 03 is answered) */}
+                  {nextStepChosen && (
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -638,6 +665,7 @@ export default function ContactView({ initialPractice, onPresetConsumed }: { ini
                     <span>{isSubmitting ? 'Sending...' : shouldShowBookingFields ? 'Send Inquiry & Request Call' : 'Send Inquiry'}</span>
                     <ArrowUpRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
                   </button>
+                  )}
                 </motion.form>
               ) : (
                 <motion.div
