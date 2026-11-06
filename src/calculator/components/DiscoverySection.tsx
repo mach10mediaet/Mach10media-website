@@ -33,7 +33,7 @@ export const DiscoverySection: React.FC<DiscoverySectionProps> = ({
   onVideoStyleChange,
 }) => {
   return (
-    <section className="border-t border-white/8 pt-8 pb-10 space-y-8">
+    <section className="pt-8 pb-10 space-y-8">
       <div className="flex items-baseline justify-between">
         <h2 className="font-sans text-lg font-medium tracking-tight text-white uppercase sm:text-xl">
           <span className="mr-2.5 font-mono text-xs text-[#F9A136]">01</span>
@@ -58,7 +58,7 @@ export const DiscoverySection: React.FC<DiscoverySectionProps> = ({
           value={clientName}
           onChange={(e) => onClientNameChange(e.target.value)}
           placeholder="Enter brand name (e.g. RakaCars, Olive & Bread)..."
-          className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 font-sans text-sm text-white placeholder:text-[#8c8c8c] transition-colors focus:border-[#F9A136] focus:outline-none sm:text-base"
+          className="w-full border-b border-white/15 bg-transparent px-0 py-3 font-sans text-sm text-white placeholder:text-[#8c8c8c] transition-colors focus:border-[#F9A136] focus:outline-none sm:text-base"
         />
       </div>
 
@@ -68,7 +68,7 @@ export const DiscoverySection: React.FC<DiscoverySectionProps> = ({
           Organization Scale
         </legend>
 
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {INDUSTRY_OPTIONS.map((item) => {
             const isSelected = industryScale === item.key;
             const label = SCALE_LABELS[item.key];
@@ -78,24 +78,20 @@ export const DiscoverySection: React.FC<DiscoverySectionProps> = ({
                 type="button"
                 aria-pressed={isSelected}
                 onClick={() => onIndustryScaleChange(item.key)}
-                className={`group flex flex-col justify-between rounded-xl border p-3.5 text-left transition-all duration-200 cursor-pointer ${
-                  isSelected
-                    ? 'border-[#F9A136] bg-[#F9A136]/[0.06]'
-                    : 'border-white/8 bg-white/[0.015] hover:border-white/20 hover:bg-white/[0.03]'
+                className={`group flex flex-col rounded-sm px-4 py-3.5 text-left transition-colors duration-300 cursor-pointer ${
+                  isSelected ? 'bg-[#E2912B]' : 'bg-transparent'
                 }`}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-sans text-xs font-medium text-white sm:text-sm">
-                    {label.title}
-                  </span>
-                  <span
-                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                      isSelected ? 'bg-[#F9A136]' : 'bg-white/15'
-                    }`}
-                    aria-hidden="true"
-                  />
-                </div>
-                <span className="mt-1 font-sans text-[11px] text-[#8c8c8c]">{label.sub}</span>
+                <span className={`font-mono text-[11px] tracking-[0.16em] uppercase transition-colors duration-300 sm:text-[12px] ${
+                  isSelected ? 'font-medium text-[#080808]' : 'text-neutral-200 group-hover:text-[#F9A136]'
+                }`}>
+                  {label.title}
+                </span>
+                <span className={`mt-1.5 font-sans text-[11px] font-light leading-snug transition-colors duration-300 ${
+                  isSelected ? 'text-[#080808]/70' : 'text-neutral-500 group-hover:text-neutral-400'
+                }`}>
+                  {label.sub}
+                </span>
               </button>
             );
           })}
@@ -108,7 +104,7 @@ export const DiscoverySection: React.FC<DiscoverySectionProps> = ({
           Video Production Style
         </legend>
 
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {VIDEO_STYLE_OPTIONS.map((style) => {
             const isSelected = videoStyle === style.key;
             const label = STYLE_LABELS[style.key];
@@ -118,24 +114,20 @@ export const DiscoverySection: React.FC<DiscoverySectionProps> = ({
                 type="button"
                 aria-pressed={isSelected}
                 onClick={() => onVideoStyleChange(style.key)}
-                className={`group flex flex-col justify-between rounded-xl border p-3.5 text-left transition-all duration-200 cursor-pointer ${
-                  isSelected
-                    ? 'border-[#F9A136] bg-[#F9A136]/[0.06]'
-                    : 'border-white/8 bg-white/[0.015] hover:border-white/20 hover:bg-white/[0.03]'
+                className={`group flex flex-col rounded-sm px-4 py-3.5 text-left transition-colors duration-300 cursor-pointer ${
+                  isSelected ? 'bg-[#E2912B]' : 'bg-transparent'
                 }`}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-sans text-xs font-medium text-white sm:text-sm">
-                    {label.title}
-                  </span>
-                  <span
-                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                      isSelected ? 'bg-[#F9A136]' : 'bg-white/15'
-                    }`}
-                    aria-hidden="true"
-                  />
-                </div>
-                <span className="mt-1 font-sans text-[11px] text-[#8c8c8c]">{label.sub}</span>
+                <span className={`font-mono text-[11px] tracking-[0.16em] uppercase transition-colors duration-300 sm:text-[12px] ${
+                  isSelected ? 'font-medium text-[#080808]' : 'text-neutral-200 group-hover:text-[#F9A136]'
+                }`}>
+                  {label.title}
+                </span>
+                <span className={`mt-1.5 font-sans text-[11px] font-light leading-snug transition-colors duration-300 ${
+                  isSelected ? 'text-[#080808]/70' : 'text-neutral-500 group-hover:text-neutral-400'
+                }`}>
+                  {label.sub}
+                </span>
               </button>
             );
           })}

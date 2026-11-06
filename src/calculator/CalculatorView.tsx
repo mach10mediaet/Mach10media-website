@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { RotateCcw } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { RotateCcw, ArrowUpRight } from 'lucide-react';
 import type { ChannelKey, DeliverablesState } from './types';
 import { DEFAULT_CHANNELS, PRESET_DEFINITIONS } from './constants/defaults';
 import { calculateScope } from './utils/pricing';
@@ -8,7 +9,7 @@ import { DiscoverySection } from './components/DiscoverySection';
 import { PresetsSection } from './components/PresetsSection';
 import { DeliverablesSection } from './components/DeliverablesSection';
 import { ChannelsSection } from './components/ChannelsSection';
-import { StickySummaryCard } from './components/StickySummaryCard';
+import { EstimateCard } from './components/EstimateCard';
 
 const INITIAL_DELIVERABLES: DeliverablesState = {
   clientName: '',
@@ -27,6 +28,8 @@ export default function CalculatorView() {
   const { config: pricingConfig } = usePricingConfig();
 
   const [deliverables, setDeliverables] = useState<DeliverablesState>(INITIAL_DELIVERABLES);
+  // Hidden until the client finishes the scope form and presses the estimate CTA.
+  const [estimateRevealed, setEstimateRevealed] = useState(false);
 
   const handleSelectPreset = (presetKey: 'bronze' | 'silver' | 'gold') => {
     const preset = PRESET_DEFINITIONS[presetKey];
@@ -155,87 +158,145 @@ export default function CalculatorView() {
     return calculateScope(deliverables, pricingConfig);
   }, [deliverables, pricingConfig]);
 
+  const revealEstimate = () => {
+    setEstimateRevealed(true);
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  };
+
+  const backToScope = () => {
+    setEstimateRevealed(false);
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  };
+
   return (
     <div className="relative min-h-screen bg-transparent text-[#f2f2f2] selection:bg-white selection:text-black antialiased px-6 pt-36 pb-36 md:px-12 lg:pb-24">
-      <div className="mx-auto w-full max-w-6xl">
-        {/* Compact Scannable Header */}
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <p className="mb-1.5 font-mono text-[11px] tracking-[0.26em] text-[#F9A136] uppercase">
-              Scope Studio
+      <div className="mx-auto w-full max-w-5xl">
+        {/* Page header — matches the studio-wide page hero pattern */}
+        <div className="mb-16 border-b border-white/5 pb-10">
+          <div className="mb-4 flex items-center justify-between gap-6">
+            <p className="text-[#a3a3a3] font-mono text-[12px] tracking-[0.3em] uppercase">
+              THE RATE ESTIMATOR
             </p>
-            <h1 className="font-sans text-2xl font-light tracking-tight text-white uppercase sm:text-4xl">
-              Monthly Content <span className="font-semibold">Retainer</span>
-            </h1>
+
+            <button
+              type="button"
+              onClick={handleResetCalculator}
+              className="inline-flex shrink-0 items-center gap-1.5 py-1 font-mono text-[10px] tracking-[0.18em] text-[#8c8c8c] uppercase transition-colors hover:text-white cursor-pointer"
+            >
+              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="hidden sm:inline">Reset Scope</span>
+              <span className="sm:hidden">Reset</span>
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={handleResetCalculator}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.04] px-4 py-2 font-mono text-[10px] tracking-[0.18em] text-[#b3b3b3] uppercase transition-colors hover:border-white/25 hover:text-white cursor-pointer"
-          >
-            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-            <span className="hidden sm:inline">Reset Scope</span>
-            <span className="sm:hidden">Reset</span>
-          </button>
+          <h1 className="font-sans text-4xl font-extralight tracking-tighter text-[#f2f2f2] sm:text-5xl md:text-6xl max-w-5xl uppercase">
+            build your{' '}
+            <span className="webkit-stroke font-black opacity-80 leading-none">monthly retainer</span>
+          </h1>
+          <p className="mt-4 max-w-xl font-sans text-sm sm:text-[15px] font-light text-neutral-400 leading-relaxed">
+            Pick a package, adjust the deliverables, and switch on extra channels — then run the
+            estimate for your monthly total.
+          </p>
         </div>
 
-        {/* Split Workspace: Left Scope Builder & Right Sticky Estimate */}
-        <div className="relative grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
-          <div className="lg:col-span-7">
-            <DiscoverySection
-              clientName={deliverables.clientName}
-              onClientNameChange={(name) =>
-                setDeliverables((prev) => ({ ...prev, clientName: name }))
-              }
-              industryScale={deliverables.industryScale}
-              onIndustryScaleChange={(scale) =>
-                setDeliverables((prev) => ({ ...prev, industryScale: scale }))
-              }
-              videoStyle={deliverables.videoStyle}
-              onVideoStyleChange={(style) =>
-                setDeliverables((prev) => ({ ...prev, videoStyle: style }))
-              }
-            />
+        <AnimatePresence mode="wait">
+          {!estimateRevealed ? (
+            <motion.div
+              key="scope-form"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <DiscoverySection
+                clientName={deliverables.clientName}
+                onClientNameChange={(name) =>
+                  setDeliverables((prev) => ({ ...prev, clientName: name }))
+                }
+                industryScale={deliverables.industryScale}
+                onIndustryScaleChange={(scale) =>
+                  setDeliverables((prev) => ({ ...prev, industryScale: scale }))
+                }
+                videoStyle={deliverables.videoStyle}
+                onVideoStyleChange={(style) =>
+                  setDeliverables((prev) => ({ ...prev, videoStyle: style }))
+                }
+              />
 
-            <PresetsSection
-              activePreset={deliverables.activePreset}
-              onSelectPreset={handleSelectPreset}
-              pricingConfig={pricingConfig}
-              industryScale={deliverables.industryScale}
-              videoStyle={deliverables.videoStyle}
-            />
+              <PresetsSection
+                activePreset={deliverables.activePreset}
+                onSelectPreset={handleSelectPreset}
+                pricingConfig={pricingConfig}
+                industryScale={deliverables.industryScale}
+                videoStyle={deliverables.videoStyle}
+              />
 
-            <DeliverablesSection
-              videoCount={deliverables.videoCount}
-              photoCount={deliverables.photoCount}
-              graphicCount={deliverables.graphicCount}
-              storyCount={deliverables.storyCount}
-              engagementReport={deliverables.engagementReport}
-              onUpdateDeliverable={handleUpdateDeliverable}
-              videoTierUnlocked={breakdown.videoTierUnlocked}
-              visualTierUnlocked={breakdown.visualTierUnlocked}
-              storyTierUnlocked={breakdown.storyTierUnlocked}
-              totalPosts={breakdown.totalPosts}
-              isEngagementWaived={breakdown.isEngagementWaived}
-            />
+              <DeliverablesSection
+                videoCount={deliverables.videoCount}
+                photoCount={deliverables.photoCount}
+                graphicCount={deliverables.graphicCount}
+                storyCount={deliverables.storyCount}
+                engagementReport={deliverables.engagementReport}
+                onUpdateDeliverable={handleUpdateDeliverable}
+                videoTierUnlocked={breakdown.videoTierUnlocked}
+                visualTierUnlocked={breakdown.visualTierUnlocked}
+                storyTierUnlocked={breakdown.storyTierUnlocked}
+                totalPosts={breakdown.totalPosts}
+                isEngagementWaived={breakdown.isEngagementWaived}
+              />
 
-            <ChannelsSection
-              channels={deliverables.channels}
-              videoCount={deliverables.videoCount}
-              repostFreeAllowance={pricingConfig.channels.repostFreeAllowance}
-              youtubeLandscapeTierUnlocked={breakdown.youtubeLandscapeTierUnlocked}
-              onToggleChannel={handleToggleChannel}
-              onUpdateX={handleUpdateX}
-              onUpdateLinkedIn={handleUpdateLinkedIn}
-              onUpdateYouTube={handleUpdateYouTube}
-            />
-          </div>
+              <ChannelsSection
+                channels={deliverables.channels}
+                videoCount={deliverables.videoCount}
+                repostFreeAllowance={pricingConfig.channels.repostFreeAllowance}
+                youtubeLandscapeTierUnlocked={breakdown.youtubeLandscapeTierUnlocked}
+                onToggleChannel={handleToggleChannel}
+                onUpdateX={handleUpdateX}
+                onUpdateLinkedIn={handleUpdateLinkedIn}
+                onUpdateYouTube={handleUpdateYouTube}
+              />
 
-          <div className="lg:col-span-5 lg:sticky lg:top-20 lg:self-start">
-            <StickySummaryCard breakdown={breakdown} />
-          </div>
-        </div>
+              {/* Reveal the price only on demand */}
+              <div className="mt-12 border-t border-white/[0.07] pt-10">
+                <button
+                  type="button"
+                  onClick={revealEstimate}
+                  id="show-estimate-button"
+                  className="group flex w-full cursor-pointer items-center justify-center rounded-full bg-white py-4 font-mono text-[11px] font-bold tracking-[0.16em] text-[#080808] uppercase shadow-[0_10px_30px_rgba(255,255,255,0.12)] transition-all duration-500 hover:scale-[1.015] hover:bg-[#F9A136]"
+                >
+                  <span>Show My Estimate</span>
+                  <ArrowUpRight
+                    className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    aria-hidden="true"
+                  />
+                </button>
+                <p className="mt-5 text-center font-mono text-[10px] tracking-[0.2em] text-[#8c8c8c] uppercase">
+                  Calculated live from your selections — no email required
+                </p>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="estimate-result"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+            >
+              <div className="mx-auto max-w-2xl">
+                <EstimateCard breakdown={breakdown} />
+                <button
+                  type="button"
+                  onClick={backToScope}
+                  id="adjust-details-link"
+                  className="mx-auto mt-8 block font-mono text-[10px] tracking-[0.2em] text-[#8c8c8c] uppercase transition-colors hover:text-[#F9A136] cursor-pointer"
+                >
+                  Adjust Details
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

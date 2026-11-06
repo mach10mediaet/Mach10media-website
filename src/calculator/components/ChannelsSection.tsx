@@ -1,6 +1,8 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import type { ChannelKey, ChannelSelection } from '../types';
 import { DeliverableRow } from './DeliverableRow';
+import { TogglePair } from './TogglePair';
 
 interface ChannelsSectionProps {
   channels: ChannelSelection;
@@ -86,7 +88,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
   const noVideosHint = videoCount === 0 ? 'Add video reels in Step 03 first' : null;
 
   return (
-    <section className="border-t border-white/8 pt-8 pb-6">
+    <section className="pt-8 pb-6">
       <div className="mb-5 flex items-baseline justify-between">
         <h2 className="font-sans text-lg font-medium tracking-tight text-white uppercase sm:text-xl">
           <span className="mr-2.5 font-mono text-xs text-[#F9A136]">04</span>
@@ -97,7 +99,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
         </span>
       </div>
 
-      <div className="space-y-3">
+      <div className="divide-y divide-white/[0.05]">
         {CHANNEL_CARDS.map((option) => {
           const isEnabled = channels[option.key].enabled;
           const panelId = `channel-panel-${option.key}`;
@@ -106,20 +108,16 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
           return (
             <div
               key={option.key}
-              className={`rounded-2xl border transition-all duration-200 ${
-                isEnabled
-                  ? 'border-[#F9A136]/55 bg-[#F9A136]/[0.025]'
-                  : 'border-white/8 bg-white/[0.015] hover:border-white/15'
+              className={`py-1 transition-colors duration-200 ${
+                isEnabled ? 'bg-white/[0.03]' : ''
               }`}
             >
               {/* Compact Single-Line Header */}
-              <div className="flex items-center justify-between gap-4 px-5 py-4">
+              <div className="flex items-center justify-between gap-4 px-2 py-4">
                 <div className="flex items-center gap-3.5 min-w-0">
                   <span
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border font-mono text-[10px] font-bold transition-colors ${
-                      isEnabled
-                        ? 'border-[#F9A136] bg-[#F9A136] text-[#080808]'
-                        : 'border-white/15 bg-white/[0.03] text-[#8c8c8c]'
+                    className={`shrink-0 font-mono text-[10px] font-bold transition-colors ${
+                      isEnabled ? 'text-[#F9A136]' : 'text-[#8c8c8c]'
                     }`}
                     aria-hidden="true"
                   >
@@ -140,33 +138,29 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={isEnabled}
-                  aria-expanded={isEnabled}
-                  aria-controls={panelId}
-                  aria-labelledby={labelId}
-                  onClick={() => onToggleChannel(option.key)}
-                  className={`relative h-6 w-11 shrink-0 rounded-full border p-0.5 transition-colors duration-200 cursor-pointer ${
-                    isEnabled
-                      ? 'border-[#F9A136] bg-[#F9A136]'
-                      : 'border-white/15 bg-white/5'
-                  }`}
-                >
-                  <span
-                    className={`block h-4.5 w-4.5 rounded-full transition-transform duration-200 ${
-                      isEnabled
-                        ? 'translate-x-5 bg-[#080808]'
-                        : 'translate-x-0 bg-[#8c8c8c]'
-                    }`}
-                  />
-                </button>
+                <TogglePair
+                  label={option.name}
+                  checked={isEnabled}
+                  onToggle={() => onToggleChannel(option.key)}
+                  panelId={panelId}
+                />
               </div>
 
-              {/* Expanded Rows */}
-              {isEnabled && (
-                <div id={panelId} className="px-5 pb-1">
+              {/* Expanded Rows — smooth height + fade reveal */}
+              <AnimatePresence initial={false}>
+                {isEnabled && (
+                  <motion.div
+                    key="channel-panel"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{
+                      height: { duration: 0.35, ease: [0.33, 1, 0.68, 1] },
+                      opacity: { duration: 0.25 },
+                    }}
+                    className="overflow-hidden"
+                  >
+                    <div id={panelId} className="divide-y divide-white/[0.05] px-2 pb-1">
                   {option.key === 'x' && (
                     <>
                       <DeliverableRow
@@ -268,8 +262,10 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
                       />
                     </>
                   )}
-                </div>
-              )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}

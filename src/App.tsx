@@ -626,7 +626,7 @@ export default function App() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, ease: 'easeOut' }}
-          className="relative min-h-screen bg-[#080808] text-[#f2f2f2] overflow-x-hidden selection:bg-white selection:text-black antialiased"
+          className="relative min-h-screen bg-[#080808] text-[#f2f2f2] overflow-x-clip selection:bg-white selection:text-black antialiased"
         >
           {/* Delicate Cinematic Background Ambient Lights */}
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/5 rounded-full blur-[140px] pointer-events-none z-0" />

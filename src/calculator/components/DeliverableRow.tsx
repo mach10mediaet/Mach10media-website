@@ -54,10 +54,18 @@ export const DeliverableRow: React.FC<DeliverableRowProps> = ({
     }
   };
 
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isDisabled) return;
+    onChange(Math.max(min, Math.min(effectiveMax, parseInt(e.target.value, 10))));
+  };
+
+  const sliderPct =
+    effectiveMax > min ? ((clampedValue - min) / (effectiveMax - min)) * 100 : 0;
+
   const resolvedBadge = badgeText ?? (tierUnlocked ? 'Volume Rate' : null);
 
   return (
-    <div className="group border-t border-white/8 py-4 transition-colors duration-200">
+    <div className="group py-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-start gap-4 min-w-0">
           <span
@@ -81,10 +89,8 @@ export const DeliverableRow: React.FC<DeliverableRowProps> = ({
               </label>
               {resolvedBadge && (
                 <span
-                  className={`rounded-full border px-2 py-0.5 font-mono text-[9px] tracking-[0.16em] uppercase ${
-                    badgeTone === 'amber'
-                      ? 'border-[#F9A136]/30 bg-[#F9A136]/10 text-[#F9A136]'
-                      : 'border-white/12 bg-white/5 text-[#a3a3a3]'
+                  className={`font-mono text-[9px] tracking-[0.16em] uppercase ${
+                    badgeTone === 'amber' ? 'text-[#F9A136]' : 'text-[#a3a3a3]'
                   }`}
                 >
                   {resolvedBadge}
@@ -101,13 +107,13 @@ export const DeliverableRow: React.FC<DeliverableRowProps> = ({
         </div>
 
         {/* Clean Stepper */}
-        <div className="flex shrink-0 items-center rounded-full border border-white/12 bg-white/[0.02] p-1">
+        <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
             aria-label={`Decrease ${title}`}
             onClick={handleDecrement}
             disabled={isDisabled || clampedValue <= min}
-            className="flex h-7 w-7 items-center justify-center rounded-full text-[#8c8c8c] transition-colors hover:bg-white/10 hover:text-white disabled:opacity-25 cursor-pointer disabled:cursor-not-allowed"
+            className="flex h-7 w-7 items-center justify-center text-[#8c8c8c] transition-colors hover:text-white disabled:opacity-25 cursor-pointer disabled:cursor-not-allowed"
           >
             <Minus className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
@@ -128,11 +134,27 @@ export const DeliverableRow: React.FC<DeliverableRowProps> = ({
             aria-label={`Increase ${title}`}
             onClick={handleIncrement}
             disabled={isDisabled || clampedValue >= effectiveMax}
-            className="flex h-7 w-7 items-center justify-center rounded-full text-[#f2f2f2] transition-colors hover:bg-[#F9A136] hover:text-[#080808] disabled:opacity-25 cursor-pointer disabled:cursor-not-allowed"
+            className="flex h-7 w-7 items-center justify-center text-[#f2f2f2] transition-colors hover:text-[#F9A136] disabled:opacity-25 cursor-pointer disabled:cursor-not-allowed"
           >
             <Plus className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
         </div>
+      </div>
+
+      {/* Volume slider — same bounds as the stepper */}
+      <div className="mt-3 flex items-center gap-3 pl-7">
+        <input
+          type="range"
+          min={min}
+          max={effectiveMax}
+          step={1}
+          value={clampedValue}
+          disabled={isDisabled}
+          aria-label={`${title} quantity slider`}
+          onChange={handleSliderChange}
+          className="mach-slider flex-1"
+          style={{ background: `linear-gradient(to right, #F9A136 ${sliderPct}%, rgba(255,255,255,0.10) ${sliderPct}%)` }}
+        />
       </div>
     </div>
   );

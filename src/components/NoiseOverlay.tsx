@@ -13,14 +13,16 @@ export default function NoiseOverlay() {
           }}
         />
       )}
-      {/* Absolute top-right discreet grain control for artistic designers */}
-      <button 
-        onClick={() => setEnabled(!enabled)}
-        className="fixed right-6 bottom-6 z-50 rounded-full border border-white/10 bg-black/60 px-3 py-1 font-mono text-[9px] tracking-widest text-[#8a8a8a] transition-all hover:border-white/30 hover:text-white uppercase"
-        id="grain-toggle-button"
-      >
-        Grain: {enabled ? 'Active' : 'Muted'}
-      </button>
+      {/* Film grain texture toggle — studio/dev tooling only, hidden in production builds */}
+      {import.meta.env.DEV && (
+        <button
+          onClick={() => setEnabled(!enabled)}
+          className="fixed right-6 bottom-6 z-50 rounded-full border border-white/10 bg-black/60 px-3 py-1 font-mono text-[9px] tracking-widest text-[#8a8a8a] transition-all hover:border-white/30 hover:text-white uppercase"
+          id="grain-toggle-button"
+        >
+          Grain: {enabled ? 'Active' : 'Muted'}
+        </button>
+      )}
     </>
   );
 }

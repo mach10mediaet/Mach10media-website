@@ -1,5 +1,6 @@
 import React from 'react';
 import { DeliverableRow } from './DeliverableRow';
+import { TogglePair } from './TogglePair';
 
 interface DeliverablesSectionProps {
   videoCount: number;
@@ -32,7 +33,7 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
   isEngagementWaived,
 }) => {
   return (
-    <section className="border-t border-white/8 pt-8 pb-8">
+    <section className="pt-8 pb-8">
       <div className="mb-5 flex items-baseline justify-between">
         <h2 className="font-sans text-lg font-medium tracking-tight text-white uppercase sm:text-xl">
           <span className="mr-2.5 font-mono text-xs text-[#F9A136]">03</span>
@@ -43,13 +44,14 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
         </div>
       </div>
 
-      <div className="border-b border-white/8">
+      <div className="divide-y divide-white/[0.05]">
         <DeliverableRow
           id="video-posts"
           num="01"
           title="Short-Form Video & Reels"
           specs="9:16 vertical · 1080×1920 · Up to 60s"
           value={videoCount}
+          max={30}
           onChange={(val) => onUpdateDeliverable('videoCount', val)}
           tierUnlocked={videoTierUnlocked}
         />
@@ -60,6 +62,7 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
           title="Photography"
           specs="4:5 social framing · High-res stills"
           value={photoCount}
+          max={30}
           onChange={(val) => onUpdateDeliverable('photoCount', val)}
           tierUnlocked={visualTierUnlocked}
         />
@@ -70,6 +73,7 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
           title="Graphic Design"
           specs="4:5 posts & branded carousels"
           value={graphicCount}
+          max={30}
           onChange={(val) => onUpdateDeliverable('graphicCount', val)}
           tierUnlocked={visualTierUnlocked}
         />
@@ -80,12 +84,13 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
           title="Social Stories"
           specs="9:16 daily story frames"
           value={storyCount}
+          max={30}
           onChange={(val) => onUpdateDeliverable('storyCount', val)}
           tierUnlocked={storyTierUnlocked}
         />
 
         {/* 05. Monthly Analytics */}
-        <div className="group border-t border-white/8 py-4 flex items-center justify-between gap-4">
+        <div className="group py-4 flex items-center justify-between gap-4">
           <div className="flex items-start gap-4">
             <span
               className={`pt-0.5 font-mono text-xs transition-colors ${
@@ -103,7 +108,7 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
                   Monthly Analytics Report
                 </span>
                 {engagementReport && isEngagementWaived && (
-                  <span className="rounded-full border border-[#F9A136]/30 bg-[#F9A136]/10 px-2 py-0.5 font-mono text-[9px] tracking-[0.16em] text-[#F9A136] uppercase">
+                  <span className="font-mono text-[9px] tracking-[0.16em] text-[#F9A136] uppercase">
                     Free (8+ Posts)
                   </span>
                 )}
@@ -114,26 +119,11 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
             </div>
           </div>
 
-          <button
-            type="button"
-            role="switch"
-            aria-checked={engagementReport}
-            aria-labelledby="engagement-report-label"
-            onClick={() => onUpdateDeliverable('engagementReport', !engagementReport)}
-            className={`relative h-6 w-11 shrink-0 rounded-full border p-0.5 transition-colors duration-200 cursor-pointer ${
-              engagementReport
-                ? 'border-[#F9A136] bg-[#F9A136]'
-                : 'border-white/15 bg-white/5'
-            }`}
-          >
-            <span
-              className={`block h-4.5 w-4.5 rounded-full transition-transform duration-200 ${
-                engagementReport
-                  ? 'translate-x-5 bg-[#080808]'
-                  : 'translate-x-0 bg-[#8c8c8c]'
-              }`}
-            />
-          </button>
+          <TogglePair
+            label="Monthly Analytics Report"
+            checked={engagementReport}
+            onToggle={() => onUpdateDeliverable('engagementReport', !engagementReport)}
+          />
         </div>
       </div>
     </section>
