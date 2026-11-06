@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import type { ChannelKey, ChannelSelection } from '../types';
 import { DeliverableRow } from './DeliverableRow';
 import { TogglePair } from './TogglePair';
@@ -99,7 +98,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
         </span>
       </div>
 
-      <div className="divide-y divide-white/[0.05]">
+      <div className="divide-y divide-white/[0.05] [overflow-anchor:none]">
         {CHANNEL_CARDS.map((option) => {
           const isEnabled = channels[option.key].enabled;
           const panelId = `channel-panel-${option.key}`;
@@ -146,21 +145,22 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
                 />
               </div>
 
-              {/* Expanded Rows — smooth height + fade reveal */}
-              <AnimatePresence initial={false}>
-                {isEnabled && (
-                  <motion.div
-                    key="channel-panel"
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{
-                      height: { duration: 0.35, ease: [0.33, 1, 0.68, 1] },
-                      opacity: { duration: 0.25 },
-                    }}
-                    className="overflow-hidden"
-                  >
-                    <div id={panelId} className="divide-y divide-white/[0.05] px-2 pb-1">
+              {/* Expanded Rows — pure CSS grid-track reveal. The browser
+                  interpolates the grid row 0fr→1fr frame by frame: starts from
+                  rest, no measured pixel target (immune to font/reflow drift),
+                  and re-toggling mid-flight retargets smoothly instead of
+                  restarting. overflow-anchor above keeps the page from
+                  scroll-jumping while the panel grows. */}
+              <div
+                aria-hidden={!isEnabled}
+                className={`grid transition-[grid-template-rows,opacity,visibility] duration-[480ms] ease-[cubic-bezier(0.65,0,0.35,1)] ${
+                  isEnabled
+                    ? 'grid-rows-[1fr] opacity-100 visible'
+                    : 'grid-rows-[0fr] opacity-0 invisible'
+                }`}
+              >
+                <div className="min-h-0 overflow-hidden">
+                  <div id={panelId} className="divide-y divide-white/[0.05] px-2 pb-1">
                   {option.key === 'x' && (
                     <>
                       <DeliverableRow
@@ -262,10 +262,9 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
                       />
                     </>
                   )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  </div>
+                </div>
+              </div>
             </div>
           );
         })}

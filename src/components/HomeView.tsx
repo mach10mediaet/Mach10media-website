@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowDown, ArrowUpRight, Play, Quote, ChevronLeft, ChevronRight, Volume2, VolumeX, Sparkles } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, Play, ChevronLeft, ChevronRight, Volume2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Project, ActiveView, ClientLogo } from '../types';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
@@ -7,7 +7,9 @@ import { db } from '../firebase';
 import { useSiteSetting } from '../hooks/useSiteSetting';
 
 // Streamed from /public with CDN caching instead of shipping inside the bundle
-const heroVideo = '/hero-reel.mp4';
+// v2 = letterbox bars cropped out of the source reel so object-fit: cover can
+// never expose them as a gap at the top/bottom edge on any screen aspect.
+const heroVideo = '/hero-reel.mp4?v=2';
 import brandIdentityImage from '../assets/brand-identity-and-design-system.webp';
 import commercialPhotographyImage from '../assets/commerical-photography.webp';
 import foodPhotographyImage from '../assets/food-photography.webp';
@@ -214,12 +216,12 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
           <video
             ref={videoRef}
             src={heroVideo}
-            poster="/hero-poster.jpg"
+            poster="/hero-poster.jpg?v=2"
             autoPlay
             loop
             muted
             playsInline
-            className="h-full w-full object-cover opacity-50 transition-all duration-1000 saturate-[0.15] brightness-75 scale-105"
+            className="h-full w-full object-cover object-center opacity-50 transition-opacity duration-1000 saturate-[0.15] brightness-75 scale-105"
           />
           {/* Elegant Dark Vignette & Gradient Overlays */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-transparent to-[#080808]/40" />
@@ -229,16 +231,12 @@ export default function HomeView({ projects, onNavigateToProject, onNavigate }: 
         {/* Hero Content */}
         <div className="relative z-10 mx-auto w-full max-w-7xl">
           <div className="max-w-5xl">
-            <div className="flex items-center space-x-2.5 mb-6 text-[#F9A136] font-mono text-[12px] tracking-[0.3em] uppercase">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#F9A136] opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#F9A136]"></span>
-              </span>
-              <span>SELECTED ARCHIVES COLLECTION</span>
-            </div>
+            <p className="mb-6 font-mono text-[12px] tracking-[0.3em] text-[#a3a3a3] uppercase">
+              SELECTED ARCHIVES COLLECTION
+            </p>
             
             <h1 className="font-sans text-3xl xs:text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-extralight leading-[1.02] tracking-tighter text-[#f2f2f2] uppercase">
-              creating <span className="webkit-stroke font-black opacity-80 block sm:inline-block hover:text-[#F9A136] transition-colors duration-500">emotional</span> narratives <br className="hidden lg:block"/> for <span className="font-extrabold text-white">elite brands</span>
+              creating <span className="webkit-stroke font-black opacity-80 block sm:inline-block">emotional</span> narratives <br className="hidden lg:block"/> for <span className="font-extrabold text-white">elite brands</span>
             </h1>
             
             <p className="mt-6 md:mt-8 max-w-md font-sans text-xs sm:text-[16px] font-light leading-relaxed text-neutral-400">
@@ -253,7 +251,7 @@ Our work is built around clean execution, intentional design, and content that f
             <div className="flex flex-wrap gap-4">
               <button
                 onClick={() => onNavigate('work')}
-                className="group relative flex items-center overflow-hidden bg-white border border-transparent rounded-full px-7 py-3.5 font-mono text-sm font-bold tracking-widest text-[#080808] uppercase transition-all duration-500 hover:bg-[#F9A136] hover:scale-105"
+                className="group relative flex items-center overflow-hidden bg-white border border-transparent rounded-full px-7 py-3.5 font-mono text-sm font-bold tracking-widest text-[#080808] uppercase transition-all duration-500 hover:bg-[#F9A136] hover:scale-[1.015]"
                 data-cursor-text="EXPLORE"
                 id="hero-explore-cta"
               >
@@ -263,7 +261,7 @@ Our work is built around clean execution, intentional design, and content that f
               
               <button
                 onClick={() => onNavigate('contact')}
-                className="group relative flex items-center overflow-hidden rounded-full border border-white/25 bg-white/5 px-6 py-3.5 font-mono text-xs tracking-widest text-[#f2f2f2] uppercase transition-all duration-500 hover:border-[#F9A136] hover:bg-[#F9A136] hover:text-black hover:scale-105"
+                className="group relative flex items-center overflow-hidden rounded-full border border-white/25 bg-white/5 px-6 py-3.5 font-mono text-xs tracking-widest text-[#f2f2f2] uppercase transition-all duration-500 hover:border-[#F9A136] hover:bg-[#F9A136] hover:text-black hover:scale-[1.015]"
                 id="hero-inquire-project-button"
               >
                 <span>Inquire Project</span>
@@ -275,11 +273,11 @@ Our work is built around clean execution, intentional design, and content that f
             <div className="flex flex-wrap items-center gap-4">
               <button
                 onClick={toggleMute}
-                className="flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-6 py-3.5 font-mono text-xs tracking-widest text-[#f2f2f2] uppercase transition-all duration-500 hover:scale-105 hover:border-[#F9A136]/40 hover:bg-[#F9A136]/10 hover:text-[#F9A136]"
+                className="flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-6 py-3.5 font-mono text-xs tracking-widest text-[#f2f2f2] uppercase transition-all duration-500 hover:border-[#F9A136]/40 hover:bg-[#F9A136]/10 hover:text-[#F9A136]"
                 id="hero-audio-mute-button"
                 aria-pressed={!isMuted}
               >
-                <Volume2 className={`h-3 w-3 ${isMuted ? 'opacity-40' : 'text-[#F9A136] animate-pulse'}`} />
+                <Volume2 className={`h-3 w-3 ${isMuted ? 'opacity-40' : 'text-[#F9A136]'}`} />
                 <span>{isMuted ? 'Unmute Reel' : 'Mute Reel'}</span>
               </button>
 
@@ -290,7 +288,7 @@ Our work is built around clean execution, intentional design, and content that f
                 id="hero-scroll-enter-button"
               >
                 <span className="font-mono text-[12px] tracking-[0.25em] uppercase">Scroll to enter</span>
-                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-800 animate-bounce group-hover:border-[#F9A136]/50">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-800 group-hover:border-[#F9A136]/50">
                   <ArrowDown className="h-4 w-4" />
                 </div>
               </button>
@@ -344,7 +342,7 @@ Our work is built around clean execution, intentional design, and content that f
       >
         <div className="mb-20 flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
-            <p className="font-mono text-[13px] tracking-[0.3em] text-neutral-500 uppercase mb-4">CURATED SPOTLIGHT</p>
+            <p className="font-mono text-[13px] tracking-[0.3em] text-neutral-500 uppercase mb-4">FEATURED WORKS</p>
             <h2 className="font-sans text-4xl font-extralight tracking-tighter text-[#f2f2f2] uppercase">
               selected portfolio exhibits
             </h2>
@@ -363,27 +361,28 @@ Our work is built around clean execution, intentional design, and content that f
         <div className="grid gap-16 md:grid-cols-2 lg:gap-20">
           {featuredProjects.map((proj, i) => {
             const isLarge = i === 2; // Make the third one span full width for editorial styling layout
+            const hasVideo = isDirectVideoUrl(proj.videoUrl);
             return (
-              <div
+              <article
                 key={proj.id}
                 onClick={() => onNavigateToProject(proj.alias)}
-                className={`group cursor-pointer select-none border border-white/5 hover:border-white/15 bg-[#0c0c0c]/50 p-4 transition-all duration-700 ease-out ${isLarge ? 'md:col-span-2' : ''}`}
+                className={`group cursor-pointer select-none ${isLarge ? 'md:col-span-2' : ''}`}
                 id={`featured-${proj.id}`}
               >
-                <div className={`relative overflow-hidden bg-neutral-950 transition-all duration-1000 ease-out ${
+                <div className={`relative overflow-hidden bg-neutral-950 ${
                   isLarge ? 'aspect-[2.2/1] min-h-[300px]' : 'aspect-[4/5]'
                 }`}>
-                  
-                  {/* Default static image cover with exquisite grayscale-to-color transition */}
+
+                  {/* Image cover with the studio-wide grayscale-to-color transition */}
                   <img
                     src={proj.heroImage}
                     alt={proj.title}
                     referrerPolicy="no-referrer"
                     className="absolute inset-0 h-full w-full object-cover transition-all duration-[1.2s] ease-out grayscale group-hover:grayscale-0 group-hover:scale-105 saturate-[0.8] brightness-90"
                   />
-                  
-                  {/* Underneath Hover looping video snippet (Cinematic feature) */}
-                  {isDirectVideoUrl(proj.videoUrl) && (
+
+                  {/* Underneath hover looping video snippet */}
+                  {hasVideo && (
                     <video
                       src={proj.videoUrl}
                       autoPlay
@@ -394,41 +393,33 @@ Our work is built around clean execution, intentional design, and content that f
                     />
                   )}
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent opacity-80" />
-
-                  {/* Top category label details */}
-                  <div className="absolute top-6 left-6 flex items-center space-x-2">
-                    <span className="bg-[#080808]/80 text-[#f2f2f2] border border-white/10 rounded-full px-3 py-1 font-mono text-[9px] tracking-widest uppercase backdrop-blur-md group-hover:border-[#F9A136]/30">
-                      {proj.category}
-                    </span>
-                    <span className="bg-white/10 px-2.5 py-1 rounded-full font-mono text-[8.5px] text-white/50 backdrop-blur-md">
-                      {proj.year}
-                    </span>
-                  </div>
-
-                  {/* Floating click prompt on hover */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F9A136] text-black shadow-lg shadow-black/20 scale-95 group-hover:scale-100 transition-transform duration-500">
-                      <Play className="h-4 w-4 fill-current ml-0.5" />
+                  {/* Hover play prompt — video exhibits only, same as the Work archive */}
+                  {hasVideo && (
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F9A136] text-black shadow-lg shadow-black/20 scale-95 group-hover:scale-100 transition-transform duration-500">
+                        <Play className="h-3.5 w-3.5 fill-current ml-0.5" />
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Bottom details block */}
-                  <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
-                    <div>
-                      <p className="font-mono text-[10px] tracking-[0.2em] text-[#a3a3a3] uppercase mb-1">
-                        {proj.client}
-                      </p>
-                      <h3 className="font-sans text-xl font-normal tracking-tight text-white md:text-2xl uppercase group-hover:text-[#F9A136] transition-colors">
-                        {proj.title}
-                      </h3>
-                    </div>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white transition-all group-hover:bg-[#F9A136] group-hover:text-black group-hover:border-[#F9A136]">
-                      <ArrowUpRight className="h-4 w-4" />
-                    </div>
-                  </div>
+                  )}
                 </div>
-              </div>
+
+                {/* Meta block — matches the Work archive exhibit treatment */}
+                <div className="mt-5 flex items-baseline justify-between gap-4">
+                  <span className="font-mono text-[10px] tracking-[0.22em] text-[#8c8c8c] uppercase">
+                    {proj.category}
+                  </span>
+                  <span className="font-mono text-[10px] tracking-[0.22em] text-[#8c8c8c]">
+                    {proj.year}
+                  </span>
+                </div>
+                <h3 className="mt-2 flex items-center justify-between gap-3 font-sans text-xl font-extralight tracking-tight text-white uppercase transition-colors duration-300 group-hover:text-[#F9A136] md:text-2xl">
+                  <span>{proj.title}</span>
+                  <ArrowUpRight className="h-4 w-4 shrink-0 text-[#F9A136] opacity-0 transition-opacity duration-300 group-hover:opacity-100" aria-hidden="true" />
+                </h3>
+                <p className="mt-1 font-mono text-[10px] tracking-[0.18em] text-neutral-500 uppercase">
+                  {proj.client}
+                </p>
+              </article>
             );
           })}
         </div>
@@ -442,7 +433,7 @@ Our work is built around clean execution, intentional design, and content that f
         <div className="mx-auto max-w-7xl px-6 md:px-12">
           <p className="font-mono text-[13px] tracking-[0.3em] text-[#7a7a7a] uppercase mb-4">OUR SPECIALTIES</p>
           <h2 className="mb-20 font-sans text-4xl font-extralight tracking-tighter text-[#f2f2f2] sm:text-5xl uppercase">
-            the architectural practices of mach10 media
+            the studio's core services
           </h2>
 
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
@@ -470,45 +461,28 @@ Our work is built around clean execution, intentional design, and content that f
                         </p>
                       </div>
                     </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-[#a3a3a3] transition-all duration-500 group-hover:border-[#F9A136] group-hover:text-[#F9A136] group-hover:scale-105">
-                      <ArrowUpRight className="h-3.5 w-3.5" />
-                    </div>
+                    <ArrowUpRight className="shrink-0 pt-1 text-[#F9A136] opacity-0 transition-opacity duration-300 group-hover:opacity-100" aria-hidden="true" />
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Live Interactive Editorial Photo Preview on side (High-end concept) */}
+            {/* Live Interactive Editorial Photo Preview on side */}
             <div className="hidden items-center justify-center lg:col-span-5 lg:flex">
-              <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-950 border border-white/10 p-3 bg-gradient-to-tr from-[#0e0e0e] to-zinc-900">
+              <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-950 border border-white/10 p-3">
                 <div className="relative w-full h-full overflow-hidden">
                   <AnimatePresence mode="wait">
-                    {activeServiceHover !== null ? (
-                      <motion.img
-                        key={activeServiceHover}
-                        src={services[activeServiceHover].image}
-                        alt="Service illustrative aesthetic"
-                        referrerPolicy="no-referrer"
-                        initial={{ opacity: 0, scale: 1.08 }}
-                        animate={{ opacity: 0.85, scale: 1 }}
-                        exit={{ opacity: 0, scale: 1.05 }}
-                        transition={{ duration: 0.45, ease: 'easeOut' }}
-                        className="absolute inset-0 h-full w-full object-cover saturate-100 brightness-90"
-                      />
-                    ) : (
-                      <motion.div
-                        key="fallback-editorial"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center"
-                      >
-                        <Sparkles className="h-6 w-6 text-neutral-600 mb-4 animate-pulse" />
-                        <p className="font-mono text-[9px] tracking-[0.25em] text-neutral-500 uppercase">
-                          Hover craft categories to view creative studio exhibits
-                        </p>
-                      </motion.div>
-                    )}
+                    <motion.img
+                      key={activeServiceHover ?? 'default'}
+                      src={services[activeServiceHover ?? 0].image}
+                      alt={activeServiceHover !== null ? 'Selected service example' : 'Studio service example'}
+                      referrerPolicy="no-referrer"
+                      initial={{ opacity: 0, scale: 1.08 }}
+                      animate={{ opacity: 0.85, scale: 1 }}
+                      exit={{ opacity: 0, scale: 1.05 }}
+                      transition={{ duration: 0.45, ease: 'easeOut' }}
+                      className="absolute inset-0 h-full w-full object-cover saturate-100 brightness-90"
+                    />
                   </AnimatePresence>
                   <div className="absolute inset-0 bg-gradient-to-t from-[#080808]/70 to-transparent" />
                 </div>
@@ -526,7 +500,9 @@ Our work is built around clean execution, intentional design, and content that f
         className="border-t border-white/5 bg-[#090909]/40 py-24 md:py-32 mt-12 md:mt-16"
       >
         <div className="mx-auto max-w-5xl px-6 text-center md:px-12">
-          <Quote className="mx-auto h-7 w-7 text-[#a3a3a3] mb-10 opacity-70" />
+          <p className="font-mono text-[11px] tracking-[0.3em] text-[#8c8c8c] uppercase mb-10">
+            IN THEIR WORDS
+          </p>
           
           <div className="min-h-[180px] flex items-center justify-center">
             <AnimatePresence mode="wait">
@@ -559,7 +535,7 @@ Our work is built around clean execution, intentional design, and content that f
           <div className="mt-12 flex items-center justify-center space-x-6">
             <button
               onClick={handlePrevTestimonial}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-transparent text-[#f2f2f2] hover:border-[#F9A136] hover:bg-[#F9A136] hover:text-black hover:scale-105 transition-all duration-500"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-transparent text-[#f2f2f2] hover:border-[#F9A136] hover:bg-[#F9A136] hover:text-black transition-all duration-500"
               id="testimonial-prev-button"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -569,7 +545,7 @@ Our work is built around clean execution, intentional design, and content that f
             </span>
             <button
               onClick={handleNextTestimonial}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-transparent text-[#f2f2f2] hover:border-[#F9A136] hover:bg-[#F9A136] hover:text-black hover:scale-105 transition-all duration-500"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-transparent text-[#f2f2f2] hover:border-[#F9A136] hover:bg-[#F9A136] hover:text-black transition-all duration-500"
               id="testimonial-next-button"
             >
               <ChevronRight className="h-4 w-4" />
@@ -606,8 +582,7 @@ Our work is built around clean execution, intentional design, and content that f
               className="group mt-10 inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-8 py-4 font-mono text-xs tracking-widest text-white uppercase transition-all duration-500 hover:border-[#F9A136] hover:bg-[#F9A136] hover:text-black"
               id="home-instagram-cta"
             >
-              <span>@mach10.et on Instagram</span>
-              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              <span>Instagram</span>
             </a>
           )}
         </div>
@@ -620,10 +595,10 @@ Our work is built around clean execution, intentional design, and content that f
       >
         <div className="absolute inset-0 bg-[#080808]/60 backdrop-blur-[2px] pointer-events-none" />
         <div className="relative z-10 max-w-4xl">
-          <p className="font-mono text-[13px] tracking-[0.3em] text-[#8c8c8c] uppercase mb-8">INITIATE PARTNERSHIP</p>
+          <p className="font-mono text-[13px] tracking-[0.3em] text-[#8c8c8c] uppercase mb-8">NEW PROJECTS</p>
           <h2 className="font-sans text-4xl font-extralight leading-none tracking-tighter text-[#f2f2f2] sm:text-5xl md:text-6xl lg:text-7xl mb-12 uppercase">
-            let's co-author the <br/>
-            <span className="font-extrabold webkit-stroke tracking-normal hover:text-[#F9A136] transition-colors duration-500">aesthetic identity</span> of your brand
+            let's build your{' '}
+            <span className="webkit-stroke font-black opacity-80 leading-none">next project</span>
           </h2>
           
           <button
@@ -636,7 +611,7 @@ Our work is built around clean execution, intentional design, and content that f
           </button>
 
           <p className="mt-12 font-mono text-[10px] text-neutral-500 uppercase tracking-[0.3em]">
-            &bull; ADDIS ABABA &bull;
+            ADDIS ABABA
           </p>
         </div>
       </section>
