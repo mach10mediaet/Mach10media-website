@@ -19,11 +19,12 @@ const CalculatorView = lazy(() => import('./calculator/CalculatorView'));
 import { Project, ActiveView, AppDiagnosticEvent, MemberProfile, MemberRole } from './types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Analytics } from '@vercel/analytics/react';
-import { Mail, Instagram, ShieldAlert } from 'lucide-react';
+import { ShieldAlert, ArrowUpRight } from 'lucide-react';
 
 import { collection, doc, getDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { auth, db, signInWithGoogle } from './firebase';
+import { useSiteSetting } from './hooks/useSiteSetting';
 
 // ── Path-based routing (SPA) ──
 // `/work/:alias` deep-links to projects; admin stays on the `#/slug` hash route.
@@ -157,6 +158,8 @@ export default function App() {
   const [isLoadingScreen, setIsLoadingScreen] = useState<boolean>(
     () => !sessionStorage.getItem('mach10_intro_seen')
   );
+  // Footer "Book a call" row mirrors the Contact rail and only renders when set.
+  const footerBookingUrl = useSiteSetting('booking_url');
 
   useEffect(() => {
     if (!isLoadingScreen) {
@@ -660,85 +663,143 @@ export default function App() {
             </Suspense>
           </main>
 
-          {/* 4. Elegant Editorial Footer (Visual reinforcement) */}
-          <footer id="app-main-footer" className="border-t border-white/5 bg-[#030303] px-6 py-16 text-neutral-400 md:px-12">
-            <div className="mx-auto max-w-7xl rounded-[28px] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] p-8 shadow-[0_30px_120px_rgba(0,0,0,0.22)] md:p-10">
-              <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr_0.9fr]">
-                <div className="space-y-5">
-                  <div>
-                    <span className="font-sans text-lg font-bold tracking-[0.22em] text-white md:text-xl">
-                      MACH10MEDIA
-                    </span>
-                    <p className="mt-3 max-w-md font-sans text-sm leading-relaxed text-neutral-300 md:text-[15px]">
-                      High-contrast media, campaign thinking, and visual systems for brands that want culture-level presence.
-                    </p>
-                  </div>
+          {/* 4. Editorial Footer — giant wordmark, numbered hairline columns. Visual
+              language matches the page heroes (webkit-stroke masthead), the Rate
+              estimator flow and the Contact form's numbered step headers. */}
+          <footer id="app-main-footer" className="border-t border-white/5 bg-[#030303] px-6 pb-10 pt-16 text-neutral-400 md:px-12 md:pt-20">
+            <div className="mx-auto max-w-7xl">
 
-                  <div className="flex items-center gap-3">
-                    <a
-                      href="https://www.instagram.com/mach10.et/"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-neutral-400 transition-colors hover:border-white/20 hover:text-white"
-                    >
-                      <Instagram className="h-4 w-4" />
-                    </a>
-                    <a
-                      href="mailto:mach10media.et@gmail.com"
-                      className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-neutral-400 transition-colors hover:border-white/20 hover:text-white"
-                    >
-                      <Mail className="h-4 w-4" />
-                    </a>
-                  </div>
+              {/* Masthead — wordmark, one-line positioning, primary CTA */}
+              <div className="mb-12 flex flex-col gap-10 border-b border-white/[0.07] pb-12 md:mb-16 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="mb-5 font-mono text-[10px] uppercase tracking-[0.3em] text-[#8c8c8c]">
+                    Mach10 Media — Addis Ababa
+                  </p>
+                  <p className="font-sans text-4xl font-extralight uppercase leading-[0.95] tracking-tighter text-white sm:text-5xl md:text-6xl lg:text-7xl">
+                    mach10<span className="webkit-stroke font-black opacity-80 leading-none">media</span>
+                  </p>
+                  <p className="mt-5 max-w-md font-sans text-sm leading-relaxed text-neutral-400 md:max-w-lg md:text-[15px]">
+                    High-contrast media, campaign thinking, and visual systems for brands that want culture-level presence.
+                  </p>
                 </div>
 
-                <div className="space-y-4">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#8c8c8c]">Navigate</p>
-                  <div className="grid gap-2">
-                    {[
-                      { label: 'Exhibits Archives', view: 'work' as const },
-                      { label: 'Manifesto Pillars', view: 'about' as const },
-                      { label: 'Partner Commissions', view: 'contact' as const }
-                    ].map((item) => (
-                      <button
-                        key={item.view}
-                        onClick={() => { navigate(item.view); window.scrollTo(0, 0); }}
-                        className="flex w-full items-center justify-between rounded-2xl border border-white/6 bg-white/[0.02] px-4 py-3 text-left font-sans text-sm text-neutral-300 transition-colors hover:border-white/15 hover:text-white md:text-[15px]"
-                      >
-                        <span>{item.label}</span>
-                        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-neutral-500">Open</span>
-                      </button>
+                <button
+                  onClick={() => { navigate('contact'); window.scrollTo(0, 0); }}
+                  className="group flex w-fit shrink-0 items-center overflow-hidden rounded-full bg-white px-7 py-3.5 font-mono text-sm font-bold uppercase tracking-widest text-[#080808] transition-all duration-500 hover:scale-[1.015] hover:bg-[#F9A136]"
+                  id="footer-start-project-cta"
+                >
+                  <span>Start Your Project</span>
+                  <ArrowUpRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+                </button>
+              </div>
+
+              {/* Numbered columns — 01 Site Map / 02 The Studio / 03 Connect */}
+              <div className="grid gap-x-12 gap-y-12 lg:grid-cols-3">
+
+                {/* 01 — Site Map: mirrors the header nav; current view is lit */}
+                <nav aria-label="Footer">
+                  <div className="mb-6 flex items-baseline justify-between border-t border-white/[0.07] pt-5">
+                    <span className="font-mono text-[10px] tracking-[0.24em] text-[#F9A136]">01</span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#8c8c8c]">Site Map</span>
+                  </div>
+                  <div>
+                    {([
+                      { label: 'Home', view: 'home' as const },
+                      { label: 'Work', view: 'work' as const },
+                      { label: 'Services', view: 'services' as const },
+                      { label: 'Rates', view: 'calculator' as const },
+                      { label: 'About', view: 'about' as const },
+                      { label: 'Contact', view: 'contact' as const }
+                    ]).map((item) => {
+                      const isActive = item.view === activeView || (item.view === 'work' && activeView === 'project');
+                      return (
+                        <button
+                          key={item.view}
+                          onClick={() => { navigate(item.view); window.scrollTo(0, 0); }}
+                          aria-current={isActive ? 'page' : undefined}
+                          className={`group flex w-full items-center justify-between gap-4 border-b border-white/[0.05] py-3 text-left font-mono text-[11px] uppercase tracking-[0.24em] transition-colors duration-300 ${
+                            isActive ? 'text-white' : 'text-neutral-500 hover:text-[#F9A136]'
+                          }`}
+                        >
+                          <span>{item.label}</span>
+                          <ArrowUpRight className="h-3.5 w-3.5 shrink-0 opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:opacity-100" aria-hidden="true" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </nav>
+
+                {/* 02 — The Studio: positioning line + the disciplines it runs */}
+                <div>
+                  <div className="mb-6 flex items-baseline justify-between border-t border-white/[0.07] pt-5">
+                    <span className="font-mono text-[10px] tracking-[0.24em] text-[#F9A136]">02</span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#8c8c8c]">The Studio</span>
+                  </div>
+                  <p className="font-sans text-sm leading-relaxed text-neutral-400 md:text-[15px]">
+                    A media, marketing, and production team building brand identities, commercial film, photography, and social campaigns for ambitious brands. Briefs, discovery calls, and direct commissions — handled partner-to-partner from Addis Ababa.
+                  </p>
+                  <div className="mt-8">
+                    {['Creative Direction', 'Campaign Strategy', 'Film Production', 'Commercial Photography', 'Brand Systems', 'Social Campaigns'].map((discipline) => (
+                      <div key={discipline} className="flex w-full items-center justify-between gap-4 border-b border-white/[0.05] py-3 font-mono text-[11px] uppercase tracking-[0.24em] text-neutral-500">
+                        <span>{discipline}</span>
+                        <span className="h-1 w-1 shrink-0 rounded-full bg-[#F9A136]/60" aria-hidden="true" />
+                      </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#8c8c8c]">Contact</p>
-                  <div className="rounded-2xl border border-white/6 bg-white/[0.02] p-4">
-                    <p className="font-sans text-sm leading-relaxed text-neutral-300 md:text-[15px]">
-                      Inquiries regarding campaigns, brand work, and production commissions can be sent directly to our Addis Ababa team.
-                    </p>
-                    <p className="mt-4 font-mono text-[12px] tracking-[0.14em] text-white">
-                      mach10media.et@gmail.com
-                    </p>
-                    <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">
-                      Addis Ababa, Ethiopia
-                    </p>
+                {/* 03 — Connect: direct rows, no icon bubbles */}
+                <div>
+                  <div className="mb-6 flex items-baseline justify-between border-t border-white/[0.07] pt-5">
+                    <span className="font-mono text-[10px] tracking-[0.24em] text-[#F9A136]">03</span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#8c8c8c]">Connect</span>
+                  </div>
+                  <div>
+                    <a
+                      href="mailto:mach10media.et@gmail.com"
+                      className="group flex w-full items-center justify-between gap-4 border-b border-white/[0.05] py-3 font-mono text-[11px] uppercase tracking-[0.24em] text-neutral-500 transition-colors duration-300 hover:text-[#F9A136]"
+                    >
+                      <span>Email</span>
+                      <span className="truncate tracking-[0.1em] text-neutral-400 transition-colors duration-300 group-hover:text-white">mach10media.et@gmail.com</span>
+                    </a>
+                    <a
+                      href="https://www.instagram.com/mach10.et/"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group flex w-full items-center justify-between gap-4 border-b border-white/[0.05] py-3 font-mono text-[11px] uppercase tracking-[0.24em] text-neutral-500 transition-colors duration-300 hover:text-[#F9A136]"
+                    >
+                      <span>Instagram</span>
+                      <ArrowUpRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-white" aria-hidden="true" />
+                    </a>
+                    <a
+                      href="https://wa.me/251920523976?text=Hello%20Mach10%20Media%20—%20I%27d%20like%20to%20discuss%20a%20project."
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group flex w-full items-center justify-between gap-4 border-b border-white/[0.05] py-3 font-mono text-[11px] uppercase tracking-[0.24em] text-neutral-500 transition-colors duration-300 hover:text-[#F9A136]"
+                    >
+                      <span>WhatsApp</span>
+                      <span className="tracking-[0.16em] text-neutral-400 transition-colors duration-300 group-hover:text-white">+251 920 523 976</span>
+                    </a>
+                    {footerBookingUrl && (
+                      <a
+                        href={footerBookingUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group flex w-full items-center justify-between gap-4 border-b border-white/[0.05] py-3 font-mono text-[11px] uppercase tracking-[0.24em] text-neutral-500 transition-colors duration-300 hover:text-[#F9A136]"
+                        id="footer-booking-link"
+                      >
+                        <span>Book a Call</span>
+                        <ArrowUpRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-white" aria-hidden="true" />
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-10 flex flex-col gap-4 border-t border-white/6 pt-6 md:flex-row md:items-center md:justify-between">
-                <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">
-                  <span>Creative Direction</span>
-                  <span className="text-neutral-700">/</span>
-                  <span>Film Production</span>
-                  <span className="text-neutral-700">/</span>
-                  <span>Photography</span>
-                </div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">
-                  MACH10 MEDIA CO &copy; {new Date().getFullYear()}
-                </div>
+              {/* Baseline */}
+              <div className="mt-14 flex flex-col gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500 md:flex-row md:items-center md:justify-between">
+                <p>Mach10 Media Co &copy; {new Date().getFullYear()} — All rights reserved</p>
+                <p>Addis Ababa &middot; Ethiopia &middot; 09&deg;02&prime;N 38&deg;46&prime;E</p>
               </div>
             </div>
           </footer>
